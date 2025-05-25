@@ -5,7 +5,7 @@ import { FrontDesk } from './components/FrontDesk';
 import { Workout } from './components/Workout';
 import { Smoothie } from './components/Smoothie';
 import { Victory } from './components/Victory';
-import { Instructions } from './components/Instructions';
+import { GameInstructions as Instructions } from './components/GameInstructions';
 import { GameState, GAME_STATES } from './types/gameTypes';
 import { Particle } from './utils/particleSystem';
 
@@ -27,6 +27,42 @@ const App: React.FC = () => {
   const [mortyImageLoaded, setMortyImageLoaded] = useState(false);
   const [mikeImage, setMikeImage] = useState<HTMLImageElement>();
   const [mikeImageLoaded, setMikeImageLoaded] = useState(false);
+
+  // Mini-game states - moved before useEffect to avoid hoisting issues
+  const initialFrontDeskState = {
+    customerQueue: [],
+    servedCustomers: 0,
+    startTime: 0,
+    elapsedTime: 0,
+    score: 0,
+    isGameOver: false,
+    currentCustomer: null,
+    items: ['key', 'towel', 'water'],
+  };
+  const [frontDeskState, setFrontDeskState] = useState(initialFrontDeskState);
+
+  const initialWorkoutState = {
+    exercises: ['Squats', 'Push-ups', 'Sit-ups'],
+    currentExerciseIndex: 0,
+    repsCompleted: 0,
+    totalReps: 10,
+    startTime: 0,
+    elapsedTime: 0,
+    score: 0,
+    isGameOver: false,
+  };
+  const [workoutState, setWorkoutState] = useState(initialWorkoutState);
+
+  const initialSmoothieState = {
+    ingredients: ['Banana', 'Strawberry', 'Blueberry'],
+    selectedIngredients: [],
+    smoothiesMade: 0,
+    startTime: 0,
+    elapsedTime: 0,
+    score: 0,
+    isGameOver: false,
+  };
+  const [smoothieState, setSmoothieState] = useState(initialSmoothieState);
 
   useEffect(() => {
     const initStars = () => {
@@ -171,8 +207,10 @@ const App: React.FC = () => {
             FrontDesk({
               ctx,
               canvas,
-              frontDeskState,
-              setFrontDeskState,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
               onStateChange: setGameState,
               onScoreUpdate: (score: number) => setTotalScore(totalScore + score),
               onGameComplete: () => setCompletedGames(new Set(completedGames).add(gameState)),
@@ -183,8 +221,10 @@ const App: React.FC = () => {
             Workout({
               ctx,
               canvas,
-              workoutState,
-              setWorkoutState,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
               onStateChange: setGameState,
               onScoreUpdate: (score: number) => setTotalScore(totalScore + score),
               onGameComplete: () => setCompletedGames(new Set(completedGames).add(gameState)),
@@ -195,8 +235,10 @@ const App: React.FC = () => {
             Smoothie({
               ctx,
               canvas,
-              smoothieState,
-              setSmoothieState,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
               onStateChange: setGameState,
               onScoreUpdate: (score: number) => setTotalScore(totalScore + score),
               onGameComplete: () => setCompletedGames(new Set(completedGames).add(gameState)),
@@ -207,7 +249,12 @@ const App: React.FC = () => {
             Victory({
               ctx,
               canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
               totalScore,
+              completedGames,
               onStateChange: setGameState,
               particles
             });
@@ -216,6 +263,9 @@ const App: React.FC = () => {
             Instructions({
               ctx,
               canvas,
+              mouseX,
+              mouseY,
+              clicked,
               onStateChange: setGameState
             });
             break;
@@ -231,42 +281,6 @@ const App: React.FC = () => {
       render();
     }
   }, [ctx, canvas, gameState, mouseX, mouseY, clicked, backgroundStars, totalScore, completedGames, xavierImage, xavierImageLoaded, mortyImage, mortyImageLoaded, mikeImage, mikeImageLoaded, frontDeskState, workoutState, smoothieState]);
-
-  // Mini-game states
-  const initialFrontDeskState = {
-    customerQueue: [],
-    servedCustomers: 0,
-    startTime: 0,
-    elapsedTime: 0,
-    score: 0,
-    isGameOver: false,
-    currentCustomer: null,
-    items: ['key', 'towel', 'water'],
-  };
-  const [frontDeskState, setFrontDeskState] = useState(initialFrontDeskState);
-
-  const initialWorkoutState = {
-    exercises: ['Squats', 'Push-ups', 'Sit-ups'],
-    currentExerciseIndex: 0,
-    repsCompleted: 0,
-    totalReps: 10,
-    startTime: 0,
-    elapsedTime: 0,
-    score: 0,
-    isGameOver: false,
-  };
-  const [workoutState, setWorkoutState] = useState(initialWorkoutState);
-
-  const initialSmoothieState = {
-    ingredients: ['Banana', 'Strawberry', 'Blueberry'],
-    selectedIngredients: [],
-    smoothiesMade: 0,
-    startTime: 0,
-    elapsedTime: 0,
-    score: 0,
-    isGameOver: false,
-  };
-  const [smoothieState, setSmoothieState] = useState(initialSmoothieState);
 
   return (
     <canvas
