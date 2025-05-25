@@ -1,27 +1,296 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import React, { useState, useEffect } from 'react';
+import { GameMenu } from './components/GameMenu';
+import { GameMap } from './components/GameMap';
+import { FrontDesk } from './components/FrontDesk';
+import { Workout } from './components/Workout';
+import { Smoothie } from './components/Smoothie';
+import { Victory } from './components/Victory';
+import { Instructions } from './components/Instructions';
+import { GameState, GAME_STATES } from './types/gameTypes';
+import { Particle } from './utils/particleSystem';
 
-const queryClient = new QueryClient();
+const App: React.FC = () => {
+  const [gameState, setGameState] = useState<GameState>(GAME_STATES.MENU);
+  const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
+  const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
+  const [mouseX, setMouseX] = useState(0);
+  const [mouseY, setMouseY] = useState(0);
+  const [clicked, setClicked] = useState(false);
+  const [frameCount, setFrameCount] = useState(0);
+  const [backgroundStars, setBackgroundStars] = useState<any[]>([]);
+  const [particles, setParticles] = useState<Particle[]>([]);
+  const [totalScore, setTotalScore] = useState(0);
+  const [completedGames, setCompletedGames] = useState<Set<GameState>>(new Set());
+  const [xavierImage, setXavierImage] = useState<HTMLImageElement>();
+  const [xavierImageLoaded, setXavierImageLoaded] = useState(false);
+  const [mortyImage, setMortyImage] = useState<HTMLImageElement>();
+  const [mortyImageLoaded, setMortyImageLoaded] = useState(false);
+  const [mikeImage, setMikeImage] = useState<HTMLImageElement>();
+  const [mikeImageLoaded, setMikeImageLoaded] = useState(false);
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+  useEffect(() => {
+    const initStars = () => {
+      const newStars = [];
+      for (let i = 0; i < 100; i++) {
+        newStars.push({
+          x: Math.random() * (canvas?.width || 800),
+          y: Math.random() * (canvas?.height || 600),
+          size: Math.random() * 2,
+          opacity: Math.random()
+        });
+      }
+      setBackgroundStars(newStars);
+    };
+
+    // Load Xavier's image
+    const xavierImg = new Image();
+    xavierImg.onload = () => {
+      setXavierImage(xavierImg);
+      setXavierImageLoaded(true);
+      console.log('Xavier image loaded successfully');
+    };
+    xavierImg.onerror = (error) => {
+      console.error('Failed to load Xavier image:', error);
+      setXavierImageLoaded(false);
+    };
+    xavierImg.src = '/lovable-uploads/46f9249d-797d-4991-a9d7-728954ada963.png';
+
+    // Load Morty's image
+    const mortyImg = new Image();
+    mortyImg.onload = () => {
+      setMortyImage(mortyImg);
+      setMortyImageLoaded(true);
+      console.log('Morty image loaded successfully');
+    };
+    mortyImg.onerror = (error) => {
+      console.error('Failed to load Morty image:', error);
+      setMortyImageLoaded(false);
+    };
+    mortyImg.src = '/lovable-uploads/0a509393-0a99-4a04-8949-344699379246.png';
+
+    // Load Mike's image - using the uploaded image
+    const img = new Image();
+    img.onload = () => {
+      setMikeImage(img);
+      setMikeImageLoaded(true);
+      console.log('Mike image loaded successfully');
+    };
+    img.onerror = (error) => {
+      console.error('Failed to load Mike image:', error);
+      setMikeImageLoaded(false);
+    };
+    // Use the most recent uploaded image for Mike
+    img.src = '/lovable-uploads/8131f420-fab4-4256-83b6-5f8339d387f4.png';
+
+    if (canvas) {
+      initStars();
+    }
+  }, [canvas]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (canvas) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [canvas]);
+
+  useEffect(() => {
+    if (canvas) {
+      const render = () => {
+        if (!ctx) return;
+
+        // Clear the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Render the current game state
+        switch (gameState) {
+          case GAME_STATES.MENU:
+            // Ensure images are loaded before rendering the menu
+            if (xavierImageLoaded && mortyImageLoaded && mikeImageLoaded) {
+              GameMenu({
+                ctx,
+                canvas,
+                mouseX,
+                mouseY,
+                clicked,
+                frameCount,
+                backgroundStars,
+                particles,
+                xavierImage,
+                xavierImageLoaded,
+                mortyImage,
+                mortyImageLoaded,
+                mikeImage,
+                mikeImageLoaded,
+                onStateChange: setGameState
+              });
+            }
+            break;
+          case GAME_STATES.MAP:
+            GameMap({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
+              totalScore,
+              completedGames,
+              particles,
+              xavierImage,
+              xavierImageLoaded,
+              mortyImage,
+              mortyImageLoaded,
+              mikeImage,
+              mikeImageLoaded,
+              onStateChange: setGameState,
+              onInitMiniGame: (state: GameState) => {
+                // Reset minigame state when navigating away
+                switch (state) {
+                  case GAME_STATES.FRONTDESK:
+                    setFrontDeskState(initialFrontDeskState);
+                    break;
+                  case GAME_STATES.WORKOUT:
+                    setWorkoutState(initialWorkoutState);
+                    break;
+                  case GAME_STATES.SMOOTHIE:
+                    setSmoothieState(initialSmoothieState);
+                    break;
+                  default:
+                    break;
+                }
+              }
+            });
+            break;
+          case GAME_STATES.FRONTDESK:
+            FrontDesk({
+              ctx,
+              canvas,
+              frontDeskState,
+              setFrontDeskState,
+              onStateChange: setGameState,
+              onScoreUpdate: (score: number) => setTotalScore(totalScore + score),
+              onGameComplete: () => setCompletedGames(new Set(completedGames).add(gameState)),
+              particles
+            });
+            break;
+          case GAME_STATES.WORKOUT:
+            Workout({
+              ctx,
+              canvas,
+              workoutState,
+              setWorkoutState,
+              onStateChange: setGameState,
+              onScoreUpdate: (score: number) => setTotalScore(totalScore + score),
+              onGameComplete: () => setCompletedGames(new Set(completedGames).add(gameState)),
+              particles
+            });
+            break;
+          case GAME_STATES.SMOOTHIE:
+            Smoothie({
+              ctx,
+              canvas,
+              smoothieState,
+              setSmoothieState,
+              onStateChange: setGameState,
+              onScoreUpdate: (score: number) => setTotalScore(totalScore + score),
+              onGameComplete: () => setCompletedGames(new Set(completedGames).add(gameState)),
+              particles
+            });
+            break;
+          case GAME_STATES.VICTORY:
+            Victory({
+              ctx,
+              canvas,
+              totalScore,
+              onStateChange: setGameState,
+              particles
+            });
+            break;
+          case GAME_STATES.INSTRUCTIONS:
+            Instructions({
+              ctx,
+              canvas,
+              onStateChange: setGameState
+            });
+            break;
+          default:
+            break;
+        }
+
+        setFrameCount(prevFrameCount => prevFrameCount + 1);
+        setParticles(particles => particles.filter(particle => particle.life > 0));
+        requestAnimationFrame(render);
+      };
+
+      render();
+    }
+  }, [ctx, canvas, gameState, mouseX, mouseY, clicked, backgroundStars, totalScore, completedGames, xavierImage, xavierImageLoaded, mortyImage, mortyImageLoaded, mikeImage, mikeImageLoaded, frontDeskState, workoutState, smoothieState]);
+
+  // Mini-game states
+  const initialFrontDeskState = {
+    customerQueue: [],
+    servedCustomers: 0,
+    startTime: 0,
+    elapsedTime: 0,
+    score: 0,
+    isGameOver: false,
+    currentCustomer: null,
+    items: ['key', 'towel', 'water'],
+  };
+  const [frontDeskState, setFrontDeskState] = useState(initialFrontDeskState);
+
+  const initialWorkoutState = {
+    exercises: ['Squats', 'Push-ups', 'Sit-ups'],
+    currentExerciseIndex: 0,
+    repsCompleted: 0,
+    totalReps: 10,
+    startTime: 0,
+    elapsedTime: 0,
+    score: 0,
+    isGameOver: false,
+  };
+  const [workoutState, setWorkoutState] = useState(initialWorkoutState);
+
+  const initialSmoothieState = {
+    ingredients: ['Banana', 'Strawberry', 'Blueberry'],
+    selectedIngredients: [],
+    smoothiesMade: 0,
+    startTime: 0,
+    elapsedTime: 0,
+    score: 0,
+    isGameOver: false,
+  };
+  const [smoothieState, setSmoothieState] = useState(initialSmoothieState);
+
+  return (
+    <canvas
+      ref={ref => {
+        if (ref) {
+          setCanvas(ref);
+          setCtx(ref.getContext('2d'));
+          ref.width = window.innerWidth;
+          ref.height = window.innerHeight;
+        }
+      }}
+      style={{ background: 'black' }}
+      onClick={e => {
+        setMouseX(e.clientX);
+        setMouseY(e.clientY);
+        setClicked(true);
+        setTimeout(() => setClicked(false), 100);
+      }}
+      onMouseMove={e => {
+        setMouseX(e.clientX);
+        setMouseY(e.clientY);
+      }}
+    />
+  );
+};
 
 export default App;
