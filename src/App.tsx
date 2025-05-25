@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { GameMenu } from './components/GameMenu';
 import { GameMap } from './components/GameMap';
@@ -6,7 +7,7 @@ import { Workout } from './components/Workout';
 import { Smoothie } from './components/Smoothie';
 import { Victory } from './components/Victory';
 import { GameInstructions as Instructions } from './components/GameInstructions';
-import { GameState, GAME_STATES } from './types/gameTypes';
+import { GameState, GAME_STATES, GameData } from './types/gameTypes';
 import { Particle } from './utils/particleSystem';
 
 const App: React.FC = () => {
@@ -19,8 +20,7 @@ const App: React.FC = () => {
   const [frameCount, setFrameCount] = useState(0);
   const [backgroundStars, setBackgroundStars] = useState<any[]>([]);
   const [particles, setParticles] = useState<Particle[]>([]);
-  const [totalScore, setTotalScore] = useState(0);
-  const [completedGames, setCompletedGames] = useState<Set<GameState>>(new Set());
+  const [keys, setKeys] = useState<{ [key: string]: boolean }>({});
   const [xavierImage, setXavierImage] = useState<HTMLImageElement>();
   const [xavierImageLoaded, setXavierImageLoaded] = useState(false);
   const [mortyImage, setMortyImage] = useState<HTMLImageElement>();
@@ -28,41 +28,32 @@ const App: React.FC = () => {
   const [mikeImage, setMikeImage] = useState<HTMLImageElement>();
   const [mikeImageLoaded, setMikeImageLoaded] = useState(false);
 
-  // Mini-game states - moved before useEffect to avoid hoisting issues
-  const initialFrontDeskState = {
-    customerQueue: [],
-    servedCustomers: 0,
-    startTime: 0,
-    elapsedTime: 0,
-    score: 0,
-    isGameOver: false,
-    currentCustomer: null,
-    items: ['key', 'towel', 'water'],
-  };
-  const [frontDeskState, setFrontDeskState] = useState(initialFrontDeskState);
-
-  const initialWorkoutState = {
-    exercises: ['Squats', 'Push-ups', 'Sit-ups'],
-    currentExerciseIndex: 0,
-    repsCompleted: 0,
-    totalReps: 10,
-    startTime: 0,
-    elapsedTime: 0,
-    score: 0,
-    isGameOver: false,
-  };
-  const [workoutState, setWorkoutState] = useState(initialWorkoutState);
-
-  const initialSmoothieState = {
-    ingredients: ['Banana', 'Strawberry', 'Blueberry'],
-    selectedIngredients: [],
-    smoothiesMade: 0,
-    startTime: 0,
-    elapsedTime: 0,
-    score: 0,
-    isGameOver: false,
-  };
-  const [smoothieState, setSmoothieState] = useState(initialSmoothieState);
+  // Initialize game data
+  const [gameData, setGameData] = useState<GameData>({
+    frontDesk: {
+      timer: 30,
+      matches: 0,
+      currentMember: null,
+      badges: [],
+      score: 0,
+    },
+    workout: {
+      reps: 0,
+      progress: 0,
+      lastKey: null,
+      timer: 45,
+      score: 0,
+    },
+    smoothie: {
+      smoothies: 0,
+      currentRecipe: ['Banana', 'Strawberry'],
+      blender: [],
+      ingredients: [],
+      score: 0,
+    },
+    totalScore: 0,
+    completedGames: new Set(),
+  });
 
   useEffect(() => {
     const initStars = () => {
@@ -121,6 +112,23 @@ const App: React.FC = () => {
     if (canvas) {
       initStars();
     }
+
+    // Add keyboard event listeners
+    const handleKeyDown = (e: KeyboardEvent) => {
+      setKeys(prev => ({ ...prev, [e.key]: true }));
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      setKeys(prev => ({ ...prev, [e.key]: false }));
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
   }, [canvas]);
 
   useEffect(() => {
@@ -175,8 +183,8 @@ const App: React.FC = () => {
               mouseY,
               clicked,
               frameCount,
-              totalScore,
-              completedGames,
+              totalScore: gameData.totalScore,
+              completedGames: gameData.completedGames,
               particles,
               xavierImage,
               xavierImageLoaded,
@@ -189,13 +197,40 @@ const App: React.FC = () => {
                 // Reset minigame state when navigating away
                 switch (state) {
                   case GAME_STATES.FRONTDESK:
-                    setFrontDeskState(initialFrontDeskState);
+                    setGameData(prev => ({
+                      ...prev,
+                      frontDesk: {
+                        timer: 30,
+                        matches: 0,
+                        currentMember: null,
+                        badges: [],
+                        score: 0,
+                      }
+                    }));
                     break;
                   case GAME_STATES.WORKOUT:
-                    setWorkoutState(initialWorkoutState);
+                    setGameData(prev => ({
+                      ...prev,
+                      workout: {
+                        reps: 0,
+                        progress: 0,
+                        lastKey: null,
+                        timer: 45,
+                        score: 0,
+                      }
+                    }));
                     break;
                   case GAME_STATES.SMOOTHIE:
-                    setSmoothieState(initialSmoothieState);
+                    setGameData(prev => ({
+                      ...prev,
+                      smoothie: {
+                        smoothies: 0,
+                        currentRecipe: ['Banana', 'Strawberry'],
+                        blender: [],
+                        ingredients: [],
+                        score: 0,
+                      }
+                    }));
                     break;
                   default:
                     break;
@@ -211,10 +246,11 @@ const App: React.FC = () => {
               mouseY,
               clicked,
               frameCount,
+              gameData,
+              keys,
+              particles,
               onStateChange: setGameState,
-              onScoreUpdate: (score: number) => setTotalScore(totalScore + score),
-              onGameComplete: () => setCompletedGames(new Set(completedGames).add(gameState)),
-              particles
+              onUpdateGameData: setGameData
             });
             break;
           case GAME_STATES.WORKOUT:
@@ -225,10 +261,11 @@ const App: React.FC = () => {
               mouseY,
               clicked,
               frameCount,
+              gameData,
+              keys,
+              particles,
               onStateChange: setGameState,
-              onScoreUpdate: (score: number) => setTotalScore(totalScore + score),
-              onGameComplete: () => setCompletedGames(new Set(completedGames).add(gameState)),
-              particles
+              onUpdateGameData: setGameData
             });
             break;
           case GAME_STATES.SMOOTHIE:
@@ -239,10 +276,10 @@ const App: React.FC = () => {
               mouseY,
               clicked,
               frameCount,
+              gameData,
+              particles,
               onStateChange: setGameState,
-              onScoreUpdate: (score: number) => setTotalScore(totalScore + score),
-              onGameComplete: () => setCompletedGames(new Set(completedGames).add(gameState)),
-              particles
+              onUpdateGameData: setGameData
             });
             break;
           case GAME_STATES.VICTORY:
@@ -253,8 +290,8 @@ const App: React.FC = () => {
               mouseY,
               clicked,
               frameCount,
-              totalScore,
-              completedGames,
+              totalScore: gameData.totalScore,
+              completedGames: gameData.completedGames,
               onStateChange: setGameState,
               particles
             });
@@ -280,7 +317,7 @@ const App: React.FC = () => {
 
       render();
     }
-  }, [ctx, canvas, gameState, mouseX, mouseY, clicked, backgroundStars, totalScore, completedGames, xavierImage, xavierImageLoaded, mortyImage, mortyImageLoaded, mikeImage, mikeImageLoaded, frontDeskState, workoutState, smoothieState]);
+  }, [ctx, canvas, gameState, mouseX, mouseY, clicked, backgroundStars, gameData, xavierImage, xavierImageLoaded, mortyImage, mortyImageLoaded, mikeImage, mikeImageLoaded, keys]);
 
   return (
     <canvas
