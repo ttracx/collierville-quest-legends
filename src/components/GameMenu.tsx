@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { GameState, GAME_STATES } from '../types/gameTypes';
 import { drawText, drawGradientButton, isButtonClicked, isButtonHovered } from '../utils/uiHelpers';
@@ -61,14 +62,68 @@ export const GameMenu: React.FC<GameMenuProps> = ({
   drawText(ctx, 'Collierville Quest', canvas.width / 2, 170, 32, 'white', 'center', true);
   drawText(ctx, 'Starring Xavier & Morty', canvas.width / 2, 210, 20, '#ccc', 'center', true);
 
-  // Draw both characters with animation
-  drawXavier(ctx, canvas.width / 2 - 80, 290, 1.2, true, frameCount, xavierImage, xavierImageLoaded);
-  drawText(ctx, 'Xavier', canvas.width / 2 - 80, 360, 16, 'white', 'center', true);
-  
-  drawMorty(ctx, canvas.width / 2 + 80, 290, 1.2, true, frameCount, mortyImage, mortyImageLoaded);
-  drawText(ctx, 'Morty', canvas.width / 2 + 80, 360, 16, 'white', 'center', true);
+  // Character positions and click areas
+  const xavierX = canvas.width / 2 - 80;
+  const xavierY = 290;
+  const mortyX = canvas.width / 2 + 80;
+  const mortyY = 290;
+  const characterClickRadius = 50;
 
-  // Enhanced buttons with hover effects - NOW PASSING CANVAS PARAMETER
+  // Draw both characters with animation
+  drawXavier(ctx, xavierX, xavierY, 1.2, true, frameCount, xavierImage, xavierImageLoaded);
+  drawText(ctx, 'Xavier', xavierX, 360, 16, 'white', 'center', true);
+  
+  drawMorty(ctx, mortyX, mortyY, 1.2, true, frameCount, mortyImage, mortyImageLoaded);
+  drawText(ctx, 'Morty', mortyX, 360, 16, 'white', 'center', true);
+
+  // Check for character clicks (using circular hit detection)
+  const distanceToXavier = Math.sqrt(Math.pow(mouseX - xavierX, 2) + Math.pow(mouseY - xavierY, 2));
+  const distanceToMorty = Math.sqrt(Math.pow(mouseX - mortyX, 2) + Math.pow(mouseY - mortyY, 2));
+  
+  const xavierHovered = distanceToXavier < characterClickRadius;
+  const mortyHovered = distanceToMorty < characterClickRadius;
+
+  // Add hover effects for characters
+  if (xavierHovered) {
+    ctx.save();
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = '#FFD700';
+    ctx.beginPath();
+    ctx.arc(xavierX, xavierY, characterClickRadius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    drawText(ctx, 'Click to start!', xavierX, xavierY + 80, 14, '#FFD700', 'center', true);
+  }
+
+  if (mortyHovered) {
+    ctx.save();
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = '#00BFFF';
+    ctx.beginPath();
+    ctx.arc(mortyX, mortyY, characterClickRadius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    drawText(ctx, 'Click to start!', mortyX, mortyY + 80, 14, '#00BFFF', 'center', true);
+  }
+
+  // Handle character clicks
+  if (clicked && (xavierHovered || mortyHovered)) {
+    const clickX = xavierHovered ? xavierX : mortyX;
+    const clickY = xavierHovered ? xavierY : mortyY;
+    const clickColor = xavierHovered ? '#FFD700' : '#00BFFF';
+    
+    createParticle(clickX, clickY, clickColor, 'burst', particles);
+    createParticle(clickX, clickY, '#FFD700', 'burst', particles);
+    
+    // Generate lore when starting game
+    if (!loreManager.isLoaded()) {
+      loreManager.generateGameLore();
+    }
+    
+    onStateChange(GAME_STATES.MAP);
+  }
+
+  // Enhanced buttons with hover effects
   const startHovered = isButtonHovered(300, 400, 200, 60, mouseX, mouseY, canvas);
   const instructionsHovered = isButtonHovered(300, 480, 200, 60, mouseX, mouseY, canvas);
   
@@ -91,7 +146,7 @@ export const GameMenu: React.FC<GameMenuProps> = ({
     onStateChange(GAME_STATES.INSTRUCTIONS);
   }
 
-  drawText(ctx, 'Click or tap to play', canvas.width / 2, 650, 16, '#888');
+  drawText(ctx, 'Click characters or buttons to play', canvas.width / 2, 650, 16, '#888');
 
   // Show AI status
   drawText(ctx, '✓ AI Features Enabled', canvas.width / 2, 680, 12, '#4CAF50', 'center');
