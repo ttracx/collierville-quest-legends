@@ -63,7 +63,7 @@ export const GameMenu: React.FC<GameMenuProps> = ({
   ctx.restore();
   
   drawText(ctx, 'Collierville Quest', canvas.width / 2, 170, 32, 'white', 'center', true);
-  drawText(ctx, 'Starring Xavier & Morty', canvas.width / 2, 210, 20, '#ccc', 'center', true);
+  drawText(ctx, 'Starring Xavier, Morty & Mike', canvas.width / 2, 210, 20, '#ccc', 'center', true);
 
   // Character positions and click areas - now with three characters
   const xavierX = canvas.width / 2 - 120;
