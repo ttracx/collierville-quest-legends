@@ -1,10 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { GameMenu } from './components/GameMenu';
 import { GameMap } from './components/GameMap';
 import { FrontDesk } from './components/FrontDesk';
 import { Workout } from './components/Workout';
 import { Smoothie } from './components/Smoothie';
+import { Basketball } from './components/Basketball';
+import { Swimming } from './components/Swimming';
+import { Yoga } from './components/Yoga';
+import { Cardio } from './components/Cardio';
 import { Victory } from './components/Victory';
 import { GameInstructions as Instructions } from './components/GameInstructions';
 import { GameState, GAME_STATES, GameData } from './types/gameTypes';
@@ -49,6 +52,45 @@ const App: React.FC = () => {
       currentRecipe: ['Banana', 'Strawberry'],
       blender: [],
       ingredients: [],
+      score: 0,
+    },
+    basketball: {
+      shots: 0,
+      makes: 0,
+      ballX: 400,
+      ballY: 500,
+      ballVelocityX: 0,
+      ballVelocityY: 0,
+      isCharging: false,
+      chargePower: 0,
+      timer: 0,
+      score: 0,
+    },
+    swimming: {
+      laps: 0,
+      position: 100,
+      speed: 0,
+      stamina: 100,
+      rhythm: 0,
+      timer: 0,
+      score: 0,
+    },
+    yoga: {
+      currentPose: 'Mountain Pose',
+      poseTimer: 15,
+      posesCompleted: 0,
+      balance: 50,
+      breathing: 50,
+      timer: 0,
+      score: 0,
+    },
+    cardio: {
+      currentExercise: 'Running',
+      intensity: 50,
+      heartRate: 80,
+      calories: 0,
+      exerciseTimer: 15,
+      timer: 0,
       score: 0,
     },
     totalScore: 0,
@@ -194,7 +236,7 @@ const App: React.FC = () => {
               mikeImageLoaded,
               onStateChange: setGameState,
               onInitMiniGame: (state: GameState) => {
-                // Reset minigame state when navigating away
+                // Reset minigame state when navigating to new games
                 switch (state) {
                   case GAME_STATES.FRONTDESK:
                     setGameData(prev => ({
@@ -228,6 +270,65 @@ const App: React.FC = () => {
                         currentRecipe: ['Banana', 'Strawberry'],
                         blender: [],
                         ingredients: [],
+                        score: 0,
+                      }
+                    }));
+                    break;
+                  case GAME_STATES.BASKETBALL:
+                    setGameData(prev => ({
+                      ...prev,
+                      basketball: {
+                        shots: 0,
+                        makes: 0,
+                        ballX: canvas.width / 2,
+                        ballY: canvas.height - 100,
+                        ballVelocityX: 0,
+                        ballVelocityY: 0,
+                        isCharging: false,
+                        chargePower: 0,
+                        timer: 0,
+                        score: 0,
+                      }
+                    }));
+                    break;
+                  case GAME_STATES.SWIMMING:
+                    setGameData(prev => ({
+                      ...prev,
+                      swimming: {
+                        laps: 0,
+                        position: 100,
+                        speed: 0,
+                        stamina: 100,
+                        rhythm: 0,
+                        timer: 0,
+                        score: 0,
+                      }
+                    }));
+                    break;
+                  case GAME_STATES.YOGA:
+                    setGameData(prev => ({
+                      ...prev,
+                      yoga: {
+                        currentPose: 'Mountain Pose',
+                        poseTimer: 15,
+                        posesCompleted: 0,
+                        balance: 50,
+                        breathing: 50,
+                        timer: 0,
+                        score: 0,
+                      }
+                    }));
+                    break;
+                  case GAME_STATES.CARDIO:
+                    setGameData(prev => ({
+                      ...prev,
+                      cardio: {
+                        currentExercise: 'Running',
+                        intensity: 50,
+                        heartRate: 80,
+                        calories: 0,
+                        exerciseTimer: 15,
+                        timer: 0,
                         score: 0,
                       }
                     }));
@@ -277,6 +378,66 @@ const App: React.FC = () => {
               clicked,
               frameCount,
               gameData,
+              particles,
+              onStateChange: setGameState,
+              onUpdateGameData: setGameData
+            });
+            break;
+          case GAME_STATES.BASKETBALL:
+            Basketball({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
+              gameData,
+              keys,
+              particles,
+              onStateChange: setGameState,
+              onUpdateGameData: setGameData
+            });
+            break;
+          case GAME_STATES.SWIMMING:
+            Swimming({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
+              gameData,
+              keys,
+              particles,
+              onStateChange: setGameState,
+              onUpdateGameData: setGameData
+            });
+            break;
+          case GAME_STATES.YOGA:
+            Yoga({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
+              gameData,
+              keys,
+              particles,
+              onStateChange: setGameState,
+              onUpdateGameData: setGameData
+            });
+            break;
+          case GAME_STATES.CARDIO:
+            Cardio({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
+              gameData,
+              keys,
               particles,
               onStateChange: setGameState,
               onUpdateGameData: setGameData

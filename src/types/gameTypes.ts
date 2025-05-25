@@ -6,6 +6,10 @@ export const GAME_STATES = {
   FRONTDESK: 'frontdesk',
   WORKOUT: 'workout',
   SMOOTHIE: 'smoothie',
+  BASKETBALL: 'basketball',
+  SWIMMING: 'swimming',
+  YOGA: 'yoga',
+  CARDIO: 'cardio',
   VICTORY: 'victory'
 } as const;
 
@@ -48,10 +52,57 @@ export interface SmoothieData {
   score: number;
 }
 
+export interface BasketballData {
+  shots: number;
+  makes: number;
+  ballX: number;
+  ballY: number;
+  ballVelocityX: number;
+  ballVelocityY: number;
+  isCharging: boolean;
+  chargePower: number;
+  timer: number;
+  score: number;
+}
+
+export interface SwimmingData {
+  laps: number;
+  position: number;
+  speed: number;
+  stamina: number;
+  rhythm: number;
+  timer: number;
+  score: number;
+}
+
+export interface YogaData {
+  currentPose: string;
+  poseTimer: number;
+  posesCompleted: number;
+  balance: number;
+  breathing: number;
+  timer: number;
+  score: number;
+}
+
+export interface CardioData {
+  currentExercise: string;
+  intensity: number;
+  heartRate: number;
+  calories: number;
+  exerciseTimer: number;
+  timer: number;
+  score: number;
+}
+
 export interface GameData {
   frontDesk: FrontDeskData;
   workout: WorkoutData;
   smoothie: SmoothieData;
+  basketball: BasketballData;
+  swimming: SwimmingData;
+  yoga: YogaData;
+  cardio: CardioData;
   totalScore: number;
   completedGames: Set<GameState>;
 }
