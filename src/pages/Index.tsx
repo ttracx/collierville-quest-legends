@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 
 const Index = () => {
@@ -10,6 +9,15 @@ const Index = () => {
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    // Load Xavier's image
+    const xavierImage = new Image();
+    xavierImage.src = '/lovable-uploads/8131f420-fab4-4256-83b6-5f8339d387f4.png';
+    let imageLoaded = false;
+    
+    xavierImage.onload = () => {
+      imageLoaded = true;
+    };
 
     // Game states
     const STATES = {
@@ -196,7 +204,7 @@ const Index = () => {
         mouseY >= y && mouseY <= y + height;
     }
 
-    // Enhanced character drawing functions
+    // Enhanced character drawing functions with Xavier's real image
     function drawXavier(x: number, y: number, scale = 1, animated = false) {
       const bobOffset = animated ? Math.sin(frameCount * 0.1) * 3 : 0;
       const currentY = y + bobOffset;
@@ -210,42 +218,87 @@ const Index = () => {
       ctx.fill();
       ctx.restore();
 
-      // Head
-      ctx.fillStyle = '#8B6F47';
-      ctx.beginPath();
-      ctx.arc(x, currentY, 20 * scale, 0, Math.PI * 2);
-      ctx.fill();
+      if (imageLoaded) {
+        // Draw Xavier's real photo as a circular avatar
+        ctx.save();
+        
+        // Create circular clipping path
+        ctx.beginPath();
+        ctx.arc(x, currentY - 10 * scale, 35 * scale, 0, Math.PI * 2);
+        ctx.clip();
+        
+        // Draw the image scaled and centered
+        const imgSize = 70 * scale;
+        ctx.drawImage(xavierImage, x - imgSize/2, currentY - 45 * scale, imgSize, imgSize);
+        
+        ctx.restore();
+        
+        // Add a cool border around the photo
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 3 * scale;
+        ctx.beginPath();
+        ctx.arc(x, currentY - 10 * scale, 35 * scale, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // Add glow effect
+        ctx.save();
+        ctx.shadowColor = '#FFD700';
+        ctx.shadowBlur = 10 * scale;
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 2 * scale;
+        ctx.beginPath();
+        ctx.arc(x, currentY - 10 * scale, 35 * scale, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        // Fallback to original pixel art if image hasn't loaded
+        // Head
+        ctx.fillStyle = '#8B6F47';
+        ctx.beginPath();
+        ctx.arc(x, currentY, 20 * scale, 0, Math.PI * 2);
+        ctx.fill();
 
-      // Hair with gradient
-      const hairGradient = ctx.createRadialGradient(x, currentY - 10 * scale, 0, x, currentY - 10 * scale, 20 * scale);
-      hairGradient.addColorStop(0, '#2a2a2a');
-      hairGradient.addColorStop(1, '#1a1a1a');
-      ctx.fillStyle = hairGradient;
-      ctx.beginPath();
-      ctx.arc(x, currentY - 10 * scale, 20 * scale, Math.PI, 0);
-      ctx.fill();
+        // Hair with gradient
+        const hairGradient = ctx.createRadialGradient(x, currentY - 10 * scale, 0, x, currentY - 10 * scale, 20 * scale);
+        hairGradient.addColorStop(0, '#2a2a2a');
+        hairGradient.addColorStop(1, '#1a1a1a');
+        ctx.fillStyle = hairGradient;
+        ctx.beginPath();
+        ctx.arc(x, currentY - 10 * scale, 20 * scale, Math.PI, 0);
+        ctx.fill();
 
-      // Beard with gradient
-      const beardGradient = ctx.createLinearGradient(x - 15 * scale, currentY + 5 * scale, x + 15 * scale, currentY + 20 * scale);
-      beardGradient.addColorStop(0, '#2a2a2a');
-      beardGradient.addColorStop(1, '#1a1a1a');
-      ctx.fillStyle = beardGradient;
-      ctx.fillRect(x - 15 * scale, currentY + 5 * scale, 30 * scale, 15 * scale);
+        // Beard with gradient
+        const beardGradient = ctx.createLinearGradient(x - 15 * scale, currentY + 5 * scale, x + 15 * scale, currentY + 20 * scale);
+        beardGradient.addColorStop(0, '#2a2a2a');
+        beardGradient.addColorStop(1, '#1a1a1a');
+        ctx.fillStyle = beardGradient;
+        ctx.fillRect(x - 15 * scale, currentY + 5 * scale, 30 * scale, 15 * scale);
 
-      // Eyes with shine
-      ctx.fillStyle = 'white';
-      ctx.fillRect(x - 8 * scale, currentY - 5 * scale, 6 * scale, 6 * scale);
-      ctx.fillRect(x + 2 * scale, currentY - 5 * scale, 6 * scale, 6 * scale);
-      ctx.fillStyle = '#1a1a1a';
-      ctx.fillRect(x - 6 * scale, currentY - 3 * scale, 3 * scale, 3 * scale);
-      ctx.fillRect(x + 3 * scale, currentY - 3 * scale, 3 * scale, 3 * scale);
-      
-      // Eye shine
-      ctx.fillStyle = 'white';
-      ctx.fillRect(x - 7 * scale, currentY - 4 * scale, 1 * scale, 1 * scale);
-      ctx.fillRect(x + 2 * scale, currentY - 4 * scale, 1 * scale, 1 * scale);
+        // Eyes with shine
+        ctx.fillStyle = 'white';
+        ctx.fillRect(x - 8 * scale, currentY - 5 * scale, 6 * scale, 6 * scale);
+        ctx.fillRect(x + 2 * scale, currentY - 5 * scale, 6 * scale, 6 * scale);
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(x - 6 * scale, currentY - 3 * scale, 3 * scale, 3 * scale);
+        ctx.fillRect(x + 3 * scale, currentY - 3 * scale, 3 * scale, 3 * scale);
+        
+        // Eye shine
+        ctx.fillStyle = 'white';
+        ctx.fillRect(x - 7 * scale, currentY - 4 * scale, 1 * scale, 1 * scale);
+        ctx.fillRect(x + 2 * scale, currentY - 4 * scale, 1 * scale, 1 * scale);
 
-      // Body with gradient (beige sweater)
+        // Earring with glow
+        ctx.save();
+        ctx.shadowColor = '#FFD700';
+        ctx.shadowBlur = 5;
+        ctx.fillStyle = '#FFD700';
+        ctx.beginPath();
+        ctx.arc(x - 20 * scale, currentY, 2 * scale, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Body with gradient (beige sweater) - always draw this
       const bodyGradient = ctx.createLinearGradient(x - 25 * scale, currentY + 20 * scale, x + 25 * scale, currentY + 80 * scale);
       bodyGradient.addColorStop(0, '#E4B584');
       bodyGradient.addColorStop(1, '#D4A574');
@@ -255,16 +308,6 @@ const Index = () => {
       // Arms
       ctx.fillRect(x - 35 * scale, currentY + 25 * scale, 10 * scale, 40 * scale);
       ctx.fillRect(x + 25 * scale, currentY + 25 * scale, 10 * scale, 40 * scale);
-
-      // Earring with glow
-      ctx.save();
-      ctx.shadowColor = '#FFD700';
-      ctx.shadowBlur = 5;
-      ctx.fillStyle = '#FFD700';
-      ctx.beginPath();
-      ctx.arc(x - 20 * scale, currentY, 2 * scale, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
     }
 
     function drawMemberAvatar(x: number, y: number, color: string, animated = false) {
