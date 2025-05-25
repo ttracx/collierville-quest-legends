@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { GameState, GAME_STATES } from '../types/gameTypes';
 import { drawText, drawGradientButton, isButtonClicked, isButtonHovered } from '../utils/uiHelpers';
@@ -33,11 +34,11 @@ export const GameMenu: React.FC<GameMenuProps> = ({
   backgroundStars,
   particles,
   xavierImage,
-  xavierImageLoaded,
+  xavierImageLoaded = false,
   mortyImage,
-  mortyImageLoaded,
+  mortyImageLoaded = false,
   mikeImage,
-  mikeImageLoaded,
+  mikeImageLoaded = false,
   onStateChange
 }) => {
   // Animated gradient background

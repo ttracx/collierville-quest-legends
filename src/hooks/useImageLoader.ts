@@ -12,42 +12,42 @@ export const useImageLoader = () => {
   useEffect(() => {
     // Load Xavier's image
     const xavierImg = new Image();
+    xavierImg.src = '/lovable-uploads/8131f420-fab4-4256-83b6-5f8339d387f4.png';
     xavierImg.onload = () => {
-      setXavierImage(xavierImg);
-      setXavierImageLoaded(true);
       console.log('Xavier image loaded successfully');
+      setXavierImageLoaded(true);
     };
     xavierImg.onerror = (error) => {
       console.error('Failed to load Xavier image:', error);
       setXavierImageLoaded(false);
     };
-    xavierImg.src = '/lovable-uploads/46f9249d-797d-4991-a9d7-728954ada963.png';
+    setXavierImage(xavierImg);
 
     // Load Morty's image
     const mortyImg = new Image();
+    mortyImg.src = '/lovable-uploads/7bd337f7-c72b-48c2-a522-fc4dea130240.png';
     mortyImg.onload = () => {
-      setMortyImage(mortyImg);
-      setMortyImageLoaded(true);
       console.log('Morty image loaded successfully');
+      setMortyImageLoaded(true);
     };
     mortyImg.onerror = (error) => {
       console.error('Failed to load Morty image:', error);
       setMortyImageLoaded(false);
     };
-    mortyImg.src = '/lovable-uploads/0a509393-0a99-4a04-8949-344699379246.png';
+    setMortyImage(mortyImg);
 
-    // Load Mike's image
-    const img = new Image();
-    img.onload = () => {
-      setMikeImage(img);
-      setMikeImageLoaded(true);
+    // Load Mike's image (placeholder for now)
+    const mikeImg = new Image();
+    mikeImg.src = '/lovable-uploads/8131f420-fab4-4256-83b6-5f8339d387f4.png'; // Using Xavier's image as placeholder
+    mikeImg.onload = () => {
       console.log('Mike image loaded successfully');
+      setMikeImageLoaded(true);
     };
-    img.onerror = (error) => {
+    mikeImg.onerror = (error) => {
       console.error('Failed to load Mike image:', error);
       setMikeImageLoaded(false);
     };
-    img.src = '/lovable-uploads/8131f420-fab4-4256-83b6-5f8339d387f4.png';
+    setMikeImage(mikeImg);
   }, []);
 
   return {

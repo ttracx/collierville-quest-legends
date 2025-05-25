@@ -1,6 +1,7 @@
 
-import { useState, useEffect } from 'react';
-import { Particle } from '../utils/particleSystem';
+import { useState, useEffect, useRef } from 'react';
+import { Particle, updateParticles, createParticle } from '../utils/particleSystem';
+import { useIsMobile } from './use-mobile';
 
 export const useCanvasInteraction = () => {
   const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
@@ -12,26 +13,40 @@ export const useCanvasInteraction = () => {
   const [backgroundStars, setBackgroundStars] = useState<any[]>([]);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [keys, setKeys] = useState<{ [key: string]: boolean }>({});
+  
+  const isMobile = useIsMobile();
 
   useEffect(() => {
-    const initStars = () => {
+    if (!canvas) return;
+
+    // Initialize background stars
+    const initializeStars = () => {
       const newStars = [];
-      for (let i = 0; i < 100; i++) {
+      const starCount = isMobile ? 20 : 50;
+      for (let i = 0; i < starCount; i++) {
         newStars.push({
-          x: Math.random() * (canvas?.width || 800),
-          y: Math.random() * (canvas?.height || 600),
-          size: Math.random() * 2,
-          opacity: Math.random()
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 2 + 1,
+          speed: Math.random() * 0.5 + 0.1,
+          opacity: Math.random() * 0.8 + 0.2
         });
       }
       setBackgroundStars(newStars);
     };
 
-    if (canvas) {
-      initStars();
-    }
+    initializeStars();
 
-    // Add keyboard event listeners
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      setMouseX((e.clientX - rect.left) * (canvas.width / rect.width));
+      setMouseY((e.clientY - rect.top) * (canvas.height / rect.height));
+    };
+
+    const handleClick = () => {
+      setClicked(true);
+    };
+
     const handleKeyDown = (e: KeyboardEvent) => {
       setKeys(prev => ({ ...prev, [e.key]: true }));
     };
@@ -40,45 +55,45 @@ export const useCanvasInteraction = () => {
       setKeys(prev => ({ ...prev, [e.key]: false }));
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('click', handleClick);
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('click', handleClick);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
     };
-  }, [canvas]);
+  }, [canvas, isMobile]);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (canvas) {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [canvas]);
-
-  const handleClick = (e: React.MouseEvent) => {
-    setMouseX(e.clientX);
-    setMouseY(e.clientY);
+  const handleClick = () => {
     setClicked(true);
-    setTimeout(() => setClicked(false), 100);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    setMouseX(e.clientX);
-    setMouseY(e.clientY);
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    setMouseX((e.clientX - rect.left) * (canvas.width / rect.width));
+    setMouseY((e.clientY - rect.top) * (canvas.height / rect.height));
   };
 
   const updateFrameCount = () => {
-    setFrameCount(prevFrameCount => prevFrameCount + 1);
+    setFrameCount(prev => prev + 1);
+    setClicked(false);
   };
 
   const updateParticles = () => {
-    setParticles(particles => particles.filter(particle => particle.life > 0));
+    setParticles(prev => updateParticles(prev));
+    
+    // Add occasional particles
+    if (frameCount % 120 === 0 && canvas) {
+      setParticles(prev => {
+        createParticle(Math.random() * canvas.width, 0, '#ffffff', 'trail', prev);
+        return [...prev];
+      });
+    }
   };
 
   return {
