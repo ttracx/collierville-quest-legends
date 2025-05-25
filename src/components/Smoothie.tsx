@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { GameState, GAME_STATES, GameData } from '../types/gameTypes';
 import { drawText, drawGradientButton, isButtonClicked, isButtonHovered } from '../utils/uiHelpers';
@@ -61,7 +60,7 @@ export const Smoothie: React.FC<SmoothieProps> = ({
 
   // Draw ingredients
   ingredients.forEach((ingredient, index) => {
-    const hovered = isButtonHovered(ingredient.x - 40, ingredient.y - 40, 80, 80, mouseX, mouseY);
+    const hovered = isButtonHovered(ingredient.x - 40, ingredient.y - 40, 80, 80, mouseX, mouseY, canvas);
     
     ctx.fillStyle = hovered ? ingredient.color : '#333';
     ctx.fillRect(ingredient.x - 40, ingredient.y - 40, 80, 80);
@@ -72,7 +71,7 @@ export const Smoothie: React.FC<SmoothieProps> = ({
     
     drawText(ctx, ingredient.name, ingredient.x, ingredient.y, 14, 'white', 'center');
     
-    if (isButtonClicked(ingredient.x - 40, ingredient.y - 40, 80, 80, mouseX, mouseY, clicked)) {
+    if (isButtonClicked(ingredient.x - 40, ingredient.y - 40, 80, 80, mouseX, mouseY, clicked, canvas)) {
       gameData.smoothie.blender.push(ingredient.name);
       createParticle(ingredient.x, ingredient.y, ingredient.color, 'burst', particles);
       
@@ -115,10 +114,10 @@ export const Smoothie: React.FC<SmoothieProps> = ({
   ctx.strokeRect(550, 250, 100, 150);
 
   // Clear blender button
-  const clearHovered = isButtonHovered(550, 420, 100, 40, mouseX, mouseY);
+  const clearHovered = isButtonHovered(550, 420, 100, 40, mouseX, mouseY, canvas);
   drawGradientButton(ctx, 550, 420, 100, 40, 'CLEAR', '#f44336', '#d32f2f', clearHovered);
   
-  if (isButtonClicked(550, 420, 100, 40, mouseX, mouseY, clicked)) {
+  if (isButtonClicked(550, 420, 100, 40, mouseX, mouseY, clicked, canvas)) {
     gameData.smoothie.blender = [];
     onUpdateGameData(gameData);
   }
@@ -128,10 +127,10 @@ export const Smoothie: React.FC<SmoothieProps> = ({
   drawText(ctx, `Score: ${score}`, 300, 500, 20, 'white');
 
   // Back to map button
-  const backHovered = isButtonHovered(600, 500, 150, 40, mouseX, mouseY);
+  const backHovered = isButtonHovered(600, 500, 150, 40, mouseX, mouseY, canvas);
   drawGradientButton(ctx, 600, 500, 150, 40, 'BACK TO MAP', '#2196F3', '#1976D2', backHovered);
   
-  if (isButtonClicked(600, 500, 150, 40, mouseX, mouseY, clicked)) {
+  if (isButtonClicked(600, 500, 150, 40, mouseX, mouseY, clicked, canvas)) {
     onStateChange(GAME_STATES.MAP);
   }
 

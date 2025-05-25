@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { GameState, GAME_STATES } from '../types/gameTypes';
 import { drawText, drawGradientButton, isButtonClicked, isButtonHovered } from '../utils/uiHelpers';
@@ -99,21 +98,20 @@ export const Victory: React.FC<VictoryProps> = ({
 
   drawText(ctx, rating, canvas.width / 2, 480, 24, ratingColor, 'center', true);
 
-  // Play again button with hover effect
-  const playAgainHovered = isButtonHovered(200, 520, 180, 60, mouseX, mouseY);
+  // Play again and main menu buttons - NOW PASSING CANVAS PARAMETER
+  const playAgainHovered = isButtonHovered(200, 520, 180, 60, mouseX, mouseY, canvas);
   drawGradientButton(ctx, 200, 520, 180, 60, 'PLAY AGAIN', '#4CAF50', '#388E3C', playAgainHovered);
   
-  // Main menu button
-  const menuHovered = isButtonHovered(420, 520, 180, 60, mouseX, mouseY);
+  const menuHovered = isButtonHovered(420, 520, 180, 60, mouseX, mouseY, canvas);
   drawGradientButton(ctx, 420, 520, 180, 60, 'MAIN MENU', '#2196F3', '#1976D2', menuHovered);
 
-  if (isButtonClicked(200, 520, 180, 60, mouseX, mouseY, clicked)) {
+  if (isButtonClicked(200, 520, 180, 60, mouseX, mouseY, clicked, canvas)) {
     // Reset game for replay
     createParticle(290, 550, '#4CAF50', 'burst', particles);
     onStateChange(GAME_STATES.MAP);
   }
 
-  if (isButtonClicked(420, 520, 180, 60, mouseX, mouseY, clicked)) {
+  if (isButtonClicked(420, 520, 180, 60, mouseX, mouseY, clicked, canvas)) {
     createParticle(510, 550, '#2196F3', 'burst', particles);
     onStateChange(GAME_STATES.MENU);
   }

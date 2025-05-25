@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { GameState, GAME_STATES } from '../types/gameTypes';
 import { drawText, drawGradientButton, isButtonClicked, isButtonHovered } from '../utils/uiHelpers';
@@ -59,10 +58,10 @@ export const GameInstructions: React.FC<GameInstructionsProps> = ({
   drawText(ctx, '• Wrong answers reduce your time', canvas.width / 2, 380, 18, 'white');
   drawText(ctx, '• Earn points for speed and accuracy', canvas.width / 2, 410, 18, 'white');
 
-  const backHovered = isButtonHovered(300, 480, 200, 60, mouseX, mouseY);
+  const backHovered = isButtonHovered(300, 480, 200, 60, mouseX, mouseY, canvas);
   drawGradientButton(ctx, 300, 480, 200, 60, 'BACK TO MENU', '#4CAF50', '#388E3C', backHovered);
 
-  if (isButtonClicked(300, 480, 200, 60, mouseX, mouseY, clicked)) {
+  if (isButtonClicked(300, 480, 200, 60, mouseX, mouseY, clicked, canvas)) {
     onStateChange(GAME_STATES.MENU);
   }
 

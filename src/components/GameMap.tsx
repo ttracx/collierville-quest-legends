@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { GameState, GAME_STATES } from '../types/gameTypes';
 import { drawText, drawGradientButton, isButtonClicked, isButtonHovered } from '../utils/uiHelpers';
@@ -59,7 +58,7 @@ export const GameMap: React.FC<GameMapProps> = ({
     createParticle(canvas.width / 2 + 60 + (Math.random() - 0.5) * 20, 180, '#00BFFF', 'trail', particles);
   }
 
-  // Draw mini-game buttons with enhanced effects
+  // Draw mini-game buttons with enhanced effects - NOW PASSING CANVAS PARAMETER
   const games = [
     { name: 'Front Desk\nCheck-In', state: GAME_STATES.FRONTDESK, x: 150, y: 200 },
     { name: 'Workout\nChallenge', state: GAME_STATES.WORKOUT, x: 325, y: 200 },
@@ -68,7 +67,7 @@ export const GameMap: React.FC<GameMapProps> = ({
 
   games.forEach(game => {
     const completed = completedGames.has(game.state);
-    const hovered = isButtonHovered(game.x, game.y, 150, 150, mouseX, mouseY);
+    const hovered = isButtonHovered(game.x, game.y, 150, 150, mouseX, mouseY, canvas);
     const color1 = completed ? '#4CAF50' : '#ff6b35';
     const color2 = completed ? '#388E3C' : '#ff4500';
 
@@ -103,7 +102,7 @@ export const GameMap: React.FC<GameMapProps> = ({
       ctx.restore();
     }
 
-    if (!completed && isButtonClicked(game.x, game.y, 150, 150, mouseX, mouseY, clicked)) {
+    if (!completed && isButtonClicked(game.x, game.y, 150, 150, mouseX, mouseY, clicked, canvas)) {
       // Create explosion effect
       for (let i = 0; i < 10; i++) {
         createParticle(game.x + 75, game.y + 75, color1, 'burst', particles);
@@ -118,7 +117,7 @@ export const GameMap: React.FC<GameMapProps> = ({
   drawText(ctx, `Score: ${totalScore}`, canvas.width / 2, 450 + scoreFloat, 24, 'white', 'center', true);
 
   if (completedGames.size === 3) {
-    const victoryHovered = isButtonHovered(300, 500, 200, 60, mouseX, mouseY);
+    const victoryHovered = isButtonHovered(300, 500, 200, 60, mouseX, mouseY, canvas);
     drawGradientButton(ctx, 300, 500, 200, 60, 'VICTORY!', '#4CAF50', '#FFD700', victoryHovered);
     
     // Victory sparkles
@@ -126,7 +125,7 @@ export const GameMap: React.FC<GameMapProps> = ({
       createParticle(300 + Math.random() * 200, 500 + Math.random() * 60, '#FFD700', 'burst', particles);
     }
     
-    if (isButtonClicked(300, 500, 200, 60, mouseX, mouseY, clicked)) {
+    if (isButtonClicked(300, 500, 200, 60, mouseX, mouseY, clicked, canvas)) {
       onStateChange(GAME_STATES.VICTORY);
     }
   }

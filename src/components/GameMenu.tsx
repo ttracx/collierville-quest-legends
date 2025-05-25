@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { GameState, GAME_STATES } from '../types/gameTypes';
 import { drawText, drawGradientButton, isButtonClicked, isButtonHovered } from '../utils/uiHelpers';
@@ -69,14 +68,14 @@ export const GameMenu: React.FC<GameMenuProps> = ({
   drawMorty(ctx, canvas.width / 2 + 80, 290, 1.2, true, frameCount, mortyImage, mortyImageLoaded);
   drawText(ctx, 'Morty', canvas.width / 2 + 80, 360, 16, 'white', 'center', true);
 
-  // Enhanced buttons with hover effects
-  const startHovered = isButtonHovered(300, 400, 200, 60, mouseX, mouseY);
-  const instructionsHovered = isButtonHovered(300, 480, 200, 60, mouseX, mouseY);
+  // Enhanced buttons with hover effects - NOW PASSING CANVAS PARAMETER
+  const startHovered = isButtonHovered(300, 400, 200, 60, mouseX, mouseY, canvas);
+  const instructionsHovered = isButtonHovered(300, 480, 200, 60, mouseX, mouseY, canvas);
   
   drawGradientButton(ctx, 300, 400, 200, 60, 'START GAME', '#ff6b35', '#ff4500', startHovered);
   drawGradientButton(ctx, 300, 480, 200, 60, 'INSTRUCTIONS', '#2196F3', '#1976D2', instructionsHovered);
 
-  if (isButtonClicked(300, 400, 200, 60, mouseX, mouseY, clicked)) {
+  if (isButtonClicked(300, 400, 200, 60, mouseX, mouseY, clicked, canvas)) {
     createParticle(400, 430, '#ff6b35', 'burst', particles);
     createParticle(400, 430, '#FFD700', 'burst', particles);
     
@@ -87,7 +86,7 @@ export const GameMenu: React.FC<GameMenuProps> = ({
     
     onStateChange(GAME_STATES.MAP);
   }
-  if (isButtonClicked(300, 480, 200, 60, mouseX, mouseY, clicked)) {
+  if (isButtonClicked(300, 480, 200, 60, mouseX, mouseY, clicked, canvas)) {
     createParticle(400, 510, '#2196F3', 'burst', particles);
     onStateChange(GAME_STATES.INSTRUCTIONS);
   }
