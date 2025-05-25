@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { GameState, GAME_STATES, GameData } from '../types/gameTypes';
 import { Particle, createParticle, updateParticles, drawParticles } from '../utils/particleSystem';
@@ -22,21 +23,43 @@ const Index = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Mobile-optimized canvas size
+    // Optimized canvas sizing for both orientations
     const updateCanvasSize = () => {
       const container = canvas.parentElement;
       if (!container) return;
 
-      const containerRect = container.getBoundingClientRect();
-      const aspectRatio = 9 / 16; // Portrait aspect ratio for mobile
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const isLandscape = viewportWidth > viewportHeight;
       
-      let canvasWidth = Math.min(containerRect.width - 32, 400); // Max width 400px
-      let canvasHeight = canvasWidth / aspectRatio;
+      let canvasWidth, canvasHeight;
       
-      // Ensure canvas fits in viewport
-      if (canvasHeight > window.innerHeight * 0.8) {
-        canvasHeight = window.innerHeight * 0.8;
-        canvasWidth = canvasHeight * aspectRatio;
+      if (isLandscape) {
+        // Landscape: wider canvas
+        const maxWidth = Math.min(viewportWidth * 0.9, 900);
+        const maxHeight = Math.min(viewportHeight * 0.8, 600);
+        const aspectRatio = 900 / 600; // 3:2 for landscape
+        
+        canvasWidth = maxWidth;
+        canvasHeight = canvasWidth / aspectRatio;
+        
+        if (canvasHeight > maxHeight) {
+          canvasHeight = maxHeight;
+          canvasWidth = canvasHeight * aspectRatio;
+        }
+      } else {
+        // Portrait: taller canvas
+        const maxWidth = Math.min(viewportWidth * 0.95, 400);
+        const maxHeight = Math.min(viewportHeight * 0.75, 700);
+        const aspectRatio = 400 / 700; // Portrait ratio
+        
+        canvasWidth = maxWidth;
+        canvasHeight = canvasWidth / aspectRatio;
+        
+        if (canvasHeight > maxHeight) {
+          canvasHeight = maxHeight;
+          canvasWidth = canvasHeight * aspectRatio;
+        }
       }
 
       canvas.width = canvasWidth;
@@ -47,6 +70,9 @@ const Index = () => {
 
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(updateCanvasSize, 100); // Delay for orientation change
+    });
 
     // Initialize sound system
     soundSystem.init();
@@ -105,16 +131,27 @@ const Index = () => {
     let particles: Particle[] = [];
     let backgroundStars: any[] = [];
 
-    // Initialize background stars
-    for (let i = 0; i < 30; i++) { // Reduced for mobile performance
-      backgroundStars.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        size: Math.random() * 2 + 1,
-        speed: Math.random() * 0.5 + 0.1,
-        opacity: Math.random() * 0.8 + 0.2
-      });
-    }
+    // Initialize background stars with dynamic count
+    const getStarCount = () => {
+      const area = canvas.width * canvas.height;
+      return Math.max(20, Math.min(50, Math.floor(area / 15000)));
+    };
+
+    const initializeStars = () => {
+      backgroundStars = [];
+      const starCount = getStarCount();
+      for (let i = 0; i < starCount; i++) {
+        backgroundStars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 2 + 1,
+          speed: Math.random() * 0.5 + 0.1,
+          opacity: Math.random() * 0.8 + 0.2
+        });
+      }
+    };
+
+    initializeStars();
 
     const getEventCoordinates = (e: MouseEvent | TouchEvent) => {
       const rect = canvas.getBoundingClientRect();
@@ -196,6 +233,11 @@ const Index = () => {
 
     function handleStateChange(newState: GameState) {
       gameState = newState;
+      
+      // Reinitialize stars when state changes for consistency
+      if (newState === GAME_STATES.MENU) {
+        initializeStars();
+      }
       
       // Add sound effects for state changes
       if (newState === GAME_STATES.VICTORY) {
@@ -347,6 +389,7 @@ const Index = () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keyup', handleKeyUp);
       window.removeEventListener('resize', updateCanvasSize);
+      window.removeEventListener('orientationchange', updateCanvasSize);
     };
   }, []);
 
@@ -356,29 +399,29 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-4 relative">
+    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-2 sm:p-4 relative">
       {/* Sound toggle button */}
       <button
         onClick={toggleSound}
-        className="absolute top-4 right-4 z-10 bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-full transition-colors"
+        className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-full transition-colors text-lg"
       >
         {soundEnabled ? '🔊' : '🔇'}
       </button>
       
-      <div className="relative flex flex-col items-center">
+      <div className="relative flex flex-col items-center w-full max-w-4xl">
         <canvas
           ref={canvasRef}
-          className="border-2 border-orange-500 bg-gray-800 rounded-lg shadow-2xl touch-none"
+          className="border-2 border-orange-500 bg-gray-800 rounded-lg shadow-2xl touch-none max-w-full max-h-[75vh]"
           style={{ touchAction: 'none' }}
         />
-        <div className="mt-4 text-center text-white text-xs sm:text-sm max-w-xs">
+        <div className="mt-2 sm:mt-4 text-center text-white text-xs sm:text-sm max-w-xs sm:max-w-md px-2">
           Tap to interact • Use A/D keys for workout (or tap workout buttons on mobile)
         </div>
       </div>
       
       {/* Footer */}
-      <footer className="mt-8 text-center">
-        <p className="text-gray-400 text-sm">
+      <footer className="mt-4 sm:mt-8 text-center px-4">
+        <p className="text-gray-400 text-xs sm:text-sm">
           Lifetime Legends by{' '}
           <a 
             href="https://tunaas.ai" 

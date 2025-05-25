@@ -9,8 +9,9 @@ export function drawText(
   align: CanvasTextAlign = 'center',
   shadow = false
 ) {
-  // Scale text for mobile
-  const scaledSize = Math.max(size * (ctx.canvas.width / 800), 12);
+  // Improved scaling calculation for better readability
+  const baseScale = Math.min(ctx.canvas.width / 800, ctx.canvas.height / 600);
+  const scaledSize = Math.max(size * baseScale, 10);
   
   ctx.font = `${scaledSize}px Arial`;
   ctx.fillStyle = color;
@@ -18,8 +19,8 @@ export function drawText(
   
   if (shadow) {
     ctx.save();
-    ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    ctx.fillText(text, x + 2, y + 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillText(text, x + 1, y + 1);
     ctx.restore();
     ctx.fillStyle = color;
   }
@@ -39,16 +40,15 @@ export function drawGradientButton(
   isHovered = false,
   pulseAnimation = 0
 ) {
-  // Scale button for mobile
-  const scaleX = ctx.canvas.width / 800;
-  const scaleY = ctx.canvas.height / 600;
-  const scaledWidth = width * scaleX;
-  const scaledHeight = height * scaleY;
-  const scaledX = x * scaleX;
-  const scaledY = y * scaleY;
+  // Improved scaling for different orientations
+  const baseScale = Math.min(ctx.canvas.width / 800, ctx.canvas.height / 600);
+  const scaledWidth = width * baseScale;
+  const scaledHeight = height * baseScale;
+  const scaledX = x * baseScale;
+  const scaledY = y * baseScale;
   
   // Add pulse animation
-  const pulse = 1 + Math.sin(pulseAnimation) * 0.05;
+  const pulse = 1 + Math.sin(pulseAnimation) * 0.03;
   const finalWidth = scaledWidth * pulse;
   const finalHeight = scaledHeight * pulse;
   const finalX = scaledX - (finalWidth - scaledWidth) / 2;
@@ -69,14 +69,14 @@ export function drawGradientButton(
   
   // Add glow effect
   ctx.shadowColor = color1;
-  ctx.shadowBlur = isHovered ? 20 : 10;
+  ctx.shadowBlur = isHovered ? 15 : 8;
   ctx.strokeStyle = 'white';
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 1.5;
   ctx.strokeRect(finalX, finalY, finalWidth, finalHeight);
   ctx.shadowBlur = 0;
   
-  // Scale text size
-  const textSize = Math.max(24 * Math.min(scaleX, scaleY), 14);
+  // Improved text sizing
+  const textSize = Math.max(20 * baseScale, 12);
   drawText(ctx, text, finalX + finalWidth / 2, finalY + finalHeight / 2 + textSize / 4, textSize, 'white', 'center', true);
 }
 
@@ -92,14 +92,13 @@ export function isButtonClicked(
 ) {
   if (!clicked) return false;
   
-  // Scale coordinates for mobile
+  // Improved scaling for button detection
   if (canvas) {
-    const scaleX = canvas.width / 800;
-    const scaleY = canvas.height / 600;
-    const scaledX = x * scaleX;
-    const scaledY = y * scaleY;
-    const scaledWidth = width * scaleX;
-    const scaledHeight = height * scaleY;
+    const baseScale = Math.min(canvas.width / 800, canvas.height / 600);
+    const scaledX = x * baseScale;
+    const scaledY = y * baseScale;
+    const scaledWidth = width * baseScale;
+    const scaledHeight = height * baseScale;
     
     return mouseX >= scaledX && mouseX <= scaledX + scaledWidth &&
            mouseY >= scaledY && mouseY <= scaledY + scaledHeight;
@@ -118,14 +117,13 @@ export function isButtonHovered(
   mouseY: number,
   canvas?: HTMLCanvasElement
 ) {
-  // Scale coordinates for mobile
+  // Improved scaling for button detection
   if (canvas) {
-    const scaleX = canvas.width / 800;
-    const scaleY = canvas.height / 600;
-    const scaledX = x * scaleX;
-    const scaledY = y * scaleY;
-    const scaledWidth = width * scaleX;
-    const scaledHeight = height * scaleY;
+    const baseScale = Math.min(canvas.width / 800, canvas.height / 600);
+    const scaledX = x * baseScale;
+    const scaledY = y * baseScale;
+    const scaledWidth = width * baseScale;
+    const scaledHeight = height * baseScale;
     
     return mouseX >= scaledX && mouseX <= scaledX + scaledWidth &&
            mouseY >= scaledY && mouseY <= scaledY + scaledHeight;
@@ -143,11 +141,10 @@ export function drawMobileWorkoutButton(
   isPressed: boolean,
   color = '#4CAF50'
 ) {
-  const scaleX = ctx.canvas.width / 800;
-  const scaleY = ctx.canvas.height / 600;
-  const scaledX = x * scaleX;
-  const scaledY = y * scaleY;
-  const buttonSize = 60 * Math.min(scaleX, scaleY);
+  const baseScale = Math.min(ctx.canvas.width / 800, ctx.canvas.height / 600);
+  const scaledX = x * baseScale;
+  const scaledY = y * baseScale;
+  const buttonSize = 50 * baseScale;
   
   ctx.fillStyle = isPressed ? color : '#666';
   ctx.fillRect(scaledX - buttonSize/2, scaledY - buttonSize/2, buttonSize, buttonSize);
@@ -156,6 +153,35 @@ export function drawMobileWorkoutButton(
   ctx.lineWidth = 2;
   ctx.strokeRect(scaledX - buttonSize/2, scaledY - buttonSize/2, buttonSize, buttonSize);
   
-  const textSize = 20 * Math.min(scaleX, scaleY);
+  const textSize = Math.max(16 * baseScale, 12);
   drawText(ctx, text, scaledX, scaledY + textSize/4, textSize, 'white', 'center', true);
+}
+
+// New utility function for responsive positioning
+export function getResponsivePosition(
+  baseX: number,
+  baseY: number,
+  canvas: HTMLCanvasElement,
+  alignX: 'left' | 'center' | 'right' = 'center',
+  alignY: 'top' | 'center' | 'bottom' = 'center'
+) {
+  const baseScale = Math.min(canvas.width / 800, canvas.height / 600);
+  
+  let x = baseX * baseScale;
+  let y = baseY * baseScale;
+  
+  // Adjust for alignment
+  if (alignX === 'center') {
+    x = canvas.width / 2 + (baseX - 400) * baseScale;
+  } else if (alignX === 'right') {
+    x = canvas.width - (800 - baseX) * baseScale;
+  }
+  
+  if (alignY === 'center') {
+    y = canvas.height / 2 + (baseY - 300) * baseScale;
+  } else if (alignY === 'bottom') {
+    y = canvas.height - (600 - baseY) * baseScale;
+  }
+  
+  return { x, y };
 }
