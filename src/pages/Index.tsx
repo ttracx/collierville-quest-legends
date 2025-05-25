@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { GameState, GAME_STATES, GameData } from '../types/gameTypes';
 import { Particle, createParticle, updateParticles, drawParticles } from '../utils/particleSystem';
@@ -22,53 +23,18 @@ const Index = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Improved canvas sizing with better viewport handling
+    // Fullscreen canvas sizing optimized for all devices
     const updateCanvasSize = () => {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
       
-      // Account for UI elements (header, footer, padding)
-      const availableWidth = viewportWidth - 32; // 16px padding on each side
-      const availableHeight = viewportHeight - 120; // Account for header/footer space
+      // Use full viewport for immersive experience
+      canvas.width = viewportWidth;
+      canvas.height = viewportHeight;
+      canvas.style.width = `${viewportWidth}px`;
+      canvas.style.height = `${viewportHeight}px`;
       
-      const isLandscape = viewportWidth > viewportHeight;
-      
-      let canvasWidth, canvasHeight;
-      
-      if (isLandscape) {
-        // Landscape: use 4:3 aspect ratio, prioritize width
-        const targetAspectRatio = 4 / 3;
-        canvasWidth = Math.min(availableWidth * 0.9, 800);
-        canvasHeight = canvasWidth / targetAspectRatio;
-        
-        // If height exceeds available space, constrain by height
-        if (canvasHeight > availableHeight) {
-          canvasHeight = availableHeight;
-          canvasWidth = canvasHeight * targetAspectRatio;
-        }
-      } else {
-        // Portrait: use 3:4 aspect ratio, prioritize height
-        const targetAspectRatio = 3 / 4;
-        canvasHeight = Math.min(availableHeight * 0.85, 600);
-        canvasWidth = canvasHeight * targetAspectRatio;
-        
-        // If width exceeds available space, constrain by width
-        if (canvasWidth > availableWidth) {
-          canvasWidth = availableWidth;
-          canvasHeight = canvasWidth / targetAspectRatio;
-        }
-      }
-
-      // Ensure minimum sizes for playability
-      canvasWidth = Math.max(canvasWidth, 300);
-      canvasHeight = Math.max(canvasHeight, 400);
-
-      canvas.width = canvasWidth;
-      canvas.height = canvasHeight;
-      canvas.style.width = `${canvasWidth}px`;
-      canvas.style.height = `${canvasHeight}px`;
-      
-      console.log(`Canvas sized: ${canvasWidth}x${canvasHeight} (${isLandscape ? 'landscape' : 'portrait'})`);
+      console.log(`Canvas sized: ${viewportWidth}x${viewportHeight} (fullscreen)`);
     };
 
     updateCanvasSize();
@@ -137,10 +103,10 @@ const Index = () => {
     let particles: Particle[] = [];
     let backgroundStars: any[] = [];
 
-    // Initialize background stars with dynamic count
+    // Initialize background stars with dynamic count based on screen size
     const getStarCount = () => {
       const area = canvas.width * canvas.height;
-      return Math.max(20, Math.min(50, Math.floor(area / 15000)));
+      return Math.max(30, Math.min(100, Math.floor(area / 20000)));
     };
 
     const initializeStars = () => {
@@ -405,30 +371,25 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-2 sm:p-4 relative overflow-hidden">
+    <div className="fixed inset-0 bg-gray-900 flex items-center justify-center overflow-hidden">
       {/* Sound toggle button */}
       <button
         onClick={toggleSound}
-        className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-full transition-colors text-lg"
+        className="absolute top-4 right-4 z-20 bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full transition-colors text-xl shadow-lg"
       >
         {soundEnabled ? '🔊' : '🔇'}
       </button>
       
-      <div className="relative flex flex-col items-center w-full">
-        <canvas
-          ref={canvasRef}
-          className="border-2 border-orange-500 bg-gray-800 rounded-lg shadow-2xl touch-none"
-          style={{ touchAction: 'none' }}
-        />
-        <div className="mt-2 sm:mt-4 text-center text-white text-xs sm:text-sm max-w-xs sm:max-w-md px-2">
-          Tap to interact • Use A/D keys for workout (or tap workout buttons on mobile)
-        </div>
-      </div>
+      <canvas
+        ref={canvasRef}
+        className="block touch-none"
+        style={{ touchAction: 'none' }}
+      />
       
-      {/* Footer */}
-      <footer className="mt-4 sm:mt-8 text-center px-4">
-        <p className="text-gray-400 text-xs sm:text-sm">
-          Lifetime Legends by{' '}
+      {/* Minimal footer */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20">
+        <p className="text-gray-400 text-xs text-center">
+          by{' '}
           <a 
             href="https://tunaas.ai" 
             target="_blank" 
@@ -438,7 +399,7 @@ const Index = () => {
             Tunaas.ai
           </a>
         </p>
-      </footer>
+      </div>
     </div>
   );
 };

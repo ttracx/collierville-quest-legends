@@ -9,9 +9,14 @@ export function drawText(
   align: CanvasTextAlign = 'center',
   shadow = false
 ) {
-  // Better scaling calculation that works with both orientations
-  const baseScale = Math.min(ctx.canvas.width / 600, ctx.canvas.height / 400);
-  const scaledSize = Math.max(size * baseScale, 10);
+  // Dynamic scaling based on actual canvas size for fullscreen
+  const baseWidth = 800;
+  const baseHeight = 600;
+  const scaleX = ctx.canvas.width / baseWidth;
+  const scaleY = ctx.canvas.height / baseHeight;
+  const scale = Math.min(scaleX, scaleY);
+  
+  const scaledSize = Math.max(size * scale, 12);
   
   ctx.font = `${scaledSize}px Arial`;
   ctx.fillStyle = color;
@@ -40,13 +45,15 @@ export function drawGradientButton(
   isHovered = false,
   pulseAnimation = 0
 ) {
-  // Better scaling for various canvas sizes
-  const scaleX = ctx.canvas.width / 600;
-  const scaleY = ctx.canvas.height / 400;
-  const baseScale = Math.min(scaleX, scaleY);
+  // Responsive scaling for fullscreen
+  const baseWidth = 800;
+  const baseHeight = 600;
+  const scaleX = ctx.canvas.width / baseWidth;
+  const scaleY = ctx.canvas.height / baseHeight;
+  const scale = Math.min(scaleX, scaleY);
   
-  const scaledWidth = width * baseScale;
-  const scaledHeight = height * baseScale;
+  const scaledWidth = width * scale;
+  const scaledHeight = height * scale;
   const scaledX = x * scaleX;
   const scaledY = y * scaleY;
   
@@ -79,7 +86,7 @@ export function drawGradientButton(
   ctx.shadowBlur = 0;
   
   // Better text sizing
-  const textSize = Math.max(20 * baseScale, 12);
+  const textSize = Math.max(20 * scale, 14);
   drawText(ctx, text, finalX + finalWidth / 2, finalY + finalHeight / 2 + textSize / 4, textSize, 'white', 'center', true);
 }
 
@@ -96,14 +103,16 @@ export function isButtonClicked(
   if (!clicked) return false;
   
   if (canvas) {
-    const scaleX = canvas.width / 600;
-    const scaleY = canvas.height / 400;
-    const baseScale = Math.min(scaleX, scaleY);
+    const baseWidth = 800;
+    const baseHeight = 600;
+    const scaleX = canvas.width / baseWidth;
+    const scaleY = canvas.height / baseHeight;
+    const scale = Math.min(scaleX, scaleY);
     
     const scaledX = x * scaleX;
     const scaledY = y * scaleY;
-    const scaledWidth = width * baseScale;
-    const scaledHeight = height * baseScale;
+    const scaledWidth = width * scale;
+    const scaledHeight = height * scale;
     
     return mouseX >= scaledX && mouseX <= scaledX + scaledWidth &&
            mouseY >= scaledY && mouseY <= scaledY + scaledHeight;
@@ -123,14 +132,16 @@ export function isButtonHovered(
   canvas?: HTMLCanvasElement
 ) {
   if (canvas) {
-    const scaleX = canvas.width / 600;
-    const scaleY = canvas.height / 400;
-    const baseScale = Math.min(scaleX, scaleY);
+    const baseWidth = 800;
+    const baseHeight = 600;
+    const scaleX = canvas.width / baseWidth;
+    const scaleY = canvas.height / baseHeight;
+    const scale = Math.min(scaleX, scaleY);
     
     const scaledX = x * scaleX;
     const scaledY = y * scaleY;
-    const scaledWidth = width * baseScale;
-    const scaledHeight = height * baseScale;
+    const scaledWidth = width * scale;
+    const scaledHeight = height * scale;
     
     return mouseX >= scaledX && mouseX <= scaledX + scaledWidth &&
            mouseY >= scaledY && mouseY <= scaledY + scaledHeight;
@@ -148,13 +159,15 @@ export function drawMobileWorkoutButton(
   isPressed: boolean,
   color = '#4CAF50'
 ) {
-  const scaleX = ctx.canvas.width / 600;
-  const scaleY = ctx.canvas.height / 400;
-  const baseScale = Math.min(scaleX, scaleY);
+  const baseWidth = 800;
+  const baseHeight = 600;
+  const scaleX = ctx.canvas.width / baseWidth;
+  const scaleY = ctx.canvas.height / baseHeight;
+  const scale = Math.min(scaleX, scaleY);
   
   const scaledX = x * scaleX;
   const scaledY = y * scaleY;
-  const buttonSize = 50 * baseScale;
+  const buttonSize = 50 * scale;
   
   ctx.fillStyle = isPressed ? color : '#666';
   ctx.fillRect(scaledX - buttonSize/2, scaledY - buttonSize/2, buttonSize, buttonSize);
@@ -163,11 +176,11 @@ export function drawMobileWorkoutButton(
   ctx.lineWidth = 2;
   ctx.strokeRect(scaledX - buttonSize/2, scaledY - buttonSize/2, buttonSize, buttonSize);
   
-  const textSize = Math.max(16 * baseScale, 12);
+  const textSize = Math.max(16 * scale, 12);
   drawText(ctx, text, scaledX, scaledY + textSize/4, textSize, 'white', 'center', true);
 }
 
-// Improved responsive positioning function
+// Enhanced responsive positioning for fullscreen
 export function getResponsivePosition(
   baseX: number,
   baseY: number,
@@ -175,23 +188,25 @@ export function getResponsivePosition(
   alignX: 'left' | 'center' | 'right' = 'center',
   alignY: 'top' | 'center' | 'bottom' = 'center'
 ) {
-  const scaleX = canvas.width / 600;
-  const scaleY = canvas.height / 400;
+  const baseWidth = 800;
+  const baseHeight = 600;
+  const scaleX = canvas.width / baseWidth;
+  const scaleY = canvas.height / baseHeight;
   
   let x = baseX * scaleX;
   let y = baseY * scaleY;
   
   // Adjust for alignment
   if (alignX === 'center') {
-    x = canvas.width / 2 + (baseX - 300) * scaleX;
+    x = canvas.width / 2 + (baseX - baseWidth/2) * scaleX;
   } else if (alignX === 'right') {
-    x = canvas.width - (600 - baseX) * scaleX;
+    x = canvas.width - (baseWidth - baseX) * scaleX;
   }
   
   if (alignY === 'center') {
-    y = canvas.height / 2 + (baseY - 200) * scaleY;
+    y = canvas.height / 2 + (baseY - baseHeight/2) * scaleY;
   } else if (alignY === 'bottom') {
-    y = canvas.height - (400 - baseY) * scaleY;
+    y = canvas.height - (baseHeight - baseY) * scaleY;
   }
   
   return { x, y };

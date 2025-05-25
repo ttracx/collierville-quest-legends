@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { GameState, GAME_STATES } from '../types/gameTypes';
-import { drawText, drawGradientButton, isButtonClicked, isButtonHovered } from '../utils/uiHelpers';
+import { drawText, drawGradientButton, isButtonClicked, isButtonHovered, getResponsivePosition } from '../utils/uiHelpers';
 import { drawXavier, drawMorty } from '../utils/characterDrawing';
 import { createParticle, Particle } from '../utils/particleSystem';
 
@@ -46,38 +47,57 @@ export const GameMap: React.FC<GameMapProps> = ({
   ctx.fillStyle = mapGradient;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  drawText(ctx, 'SELECT A CHALLENGE', canvas.width / 2, 80, 36, '#ff6b35', 'center', true);
+  // Responsive positioning for title
+  const titlePos = getResponsivePosition(400, 80, canvas);
+  drawText(ctx, 'SELECT A CHALLENGE', titlePos.x, titlePos.y, 36, '#ff6b35', 'center', true);
 
-  // Draw both characters on the map with trail particles
-  drawXavier(ctx, canvas.width / 2 - 60, 130, 1, true, frameCount, xavierImage, xavierImageLoaded);
-  drawMorty(ctx, canvas.width / 2 + 60, 130, 1, true, frameCount, mortyImage, mortyImageLoaded);
+  // Draw characters with responsive positioning
+  const xavierPos = getResponsivePosition(340, 130, canvas);
+  const mortyPos = getResponsivePosition(460, 130, canvas);
+  
+  drawXavier(ctx, xavierPos.x, xavierPos.y, 1, true, frameCount, xavierImage, xavierImageLoaded);
+  drawMorty(ctx, mortyPos.x, mortyPos.y, 1, true, frameCount, mortyImage, mortyImageLoaded);
   
   // Add trail particles to both characters
   if (frameCount % 30 === 0) {
-    createParticle(canvas.width / 2 - 60 + (Math.random() - 0.5) * 20, 180, '#FFD700', 'trail', particles);
-    createParticle(canvas.width / 2 + 60 + (Math.random() - 0.5) * 20, 180, '#00BFFF', 'trail', particles);
+    createParticle(xavierPos.x + (Math.random() - 0.5) * 20, xavierPos.y + 50, '#FFD700', 'trail', particles);
+    createParticle(mortyPos.x + (Math.random() - 0.5) * 20, mortyPos.y + 50, '#00BFFF', 'trail', particles);
   }
 
-  // Draw mini-game buttons with enhanced effects - NOW PASSING CANVAS PARAMETER
-  const games = [
-    { name: 'Front Desk\nCheck-In', state: GAME_STATES.FRONTDESK, x: 150, y: 200 },
-    { name: 'Workout\nChallenge', state: GAME_STATES.WORKOUT, x: 325, y: 200 },
-    { name: 'Smoothie\nRush', state: GAME_STATES.SMOOTHIE, x: 500, y: 200 }
-  ];
+  // Dynamic button positioning based on screen orientation
+  const isLandscape = canvas.width > canvas.height;
+  
+  let games;
+  if (isLandscape) {
+    // Horizontal layout for landscape
+    games = [
+      { name: 'Front Desk\nCheck-In', state: GAME_STATES.FRONTDESK, x: 200, y: 200 },
+      { name: 'Workout\nChallenge', state: GAME_STATES.WORKOUT, x: 400, y: 200 },
+      { name: 'Smoothie\nRush', state: GAME_STATES.SMOOTHIE, x: 600, y: 200 }
+    ];
+  } else {
+    // Vertical layout for portrait
+    games = [
+      { name: 'Front Desk\nCheck-In', state: GAME_STATES.FRONTDESK, x: 400, y: 220 },
+      { name: 'Workout\nChallenge', state: GAME_STATES.WORKOUT, x: 400, y: 320 },
+      { name: 'Smoothie\nRush', state: GAME_STATES.SMOOTHIE, x: 400, y: 420 }
+    ];
+  }
 
   games.forEach(game => {
+    const gamePos = getResponsivePosition(game.x, game.y, canvas);
     const completed = completedGames.has(game.state);
-    const hovered = isButtonHovered(game.x, game.y, 150, 150, mouseX, mouseY, canvas);
+    const hovered = isButtonHovered(game.x, game.y, 150, 80, mouseX, mouseY, canvas);
     const color1 = completed ? '#4CAF50' : '#ff6b35';
     const color2 = completed ? '#388E3C' : '#ff4500';
 
     // Enhanced button with gradient and glow
-    const gradient = ctx.createLinearGradient(game.x, game.y, game.x, game.y + 150);
+    const gradient = ctx.createLinearGradient(gamePos.x - 75, gamePos.y - 40, gamePos.x - 75, gamePos.y + 40);
     gradient.addColorStop(0, hovered ? color2 : color1);
     gradient.addColorStop(1, hovered ? color1 : color2);
     
     ctx.fillStyle = gradient;
-    ctx.fillRect(game.x, game.y, 150, 150);
+    ctx.fillRect(gamePos.x - 75, gamePos.y - 40, 150, 80);
     
     if (hovered || completed) {
       ctx.shadowColor = color1;
@@ -86,26 +106,26 @@ export const GameMap: React.FC<GameMapProps> = ({
     
     ctx.strokeStyle = 'white';
     ctx.lineWidth = 2;
-    ctx.strokeRect(game.x, game.y, 150, 150);
+    ctx.strokeRect(gamePos.x - 75, gamePos.y - 40, 150, 80);
     ctx.shadowBlur = 0;
 
     const lines = game.name.split('\n');
     lines.forEach((line, i) => {
-      drawText(ctx, line, game.x + 75, game.y + 60 + i * 30, 20, 'white', 'center', true);
+      drawText(ctx, line, gamePos.x, gamePos.y - 10 + i * 20, 16, 'white', 'center', true);
     });
 
     if (completed) {
       ctx.save();
       ctx.shadowColor = '#4CAF50';
       ctx.shadowBlur = 10;
-      drawText(ctx, '✓', game.x + 75, game.y + 120, 40, '#4CAF50', 'center');
+      drawText(ctx, '✓', gamePos.x, gamePos.y + 25, 30, '#4CAF50', 'center');
       ctx.restore();
     }
 
-    if (!completed && isButtonClicked(game.x, game.y, 150, 150, mouseX, mouseY, clicked, canvas)) {
+    if (!completed && isButtonClicked(game.x, game.y, 150, 80, mouseX, mouseY, clicked, canvas)) {
       // Create explosion effect
       for (let i = 0; i < 10; i++) {
-        createParticle(game.x + 75, game.y + 75, color1, 'burst', particles);
+        createParticle(gamePos.x, gamePos.y, color1, 'burst', particles);
       }
       onInitMiniGame(game.state);
       onStateChange(game.state);
@@ -114,18 +134,20 @@ export const GameMap: React.FC<GameMapProps> = ({
 
   // Animated score display
   const scoreFloat = Math.sin(frameCount * 0.1) * 2;
-  drawText(ctx, `Score: ${totalScore}`, canvas.width / 2, 450 + scoreFloat, 24, 'white', 'center', true);
+  const scorePos = getResponsivePosition(400, isLandscape ? 350 : 520, canvas);
+  drawText(ctx, `Score: ${totalScore}`, scorePos.x, scorePos.y + scoreFloat, 24, 'white', 'center', true);
 
   if (completedGames.size === 3) {
-    const victoryHovered = isButtonHovered(300, 500, 200, 60, mouseX, mouseY, canvas);
-    drawGradientButton(ctx, 300, 500, 200, 60, 'VICTORY!', '#4CAF50', '#FFD700', victoryHovered);
+    const victoryPos = getResponsivePosition(400, isLandscape ? 400 : 560, canvas);
+    const victoryHovered = isButtonHovered(300, isLandscape ? 400 : 560, 200, 60, mouseX, mouseY, canvas);
+    drawGradientButton(ctx, 300, isLandscape ? 400 : 560, 200, 60, 'VICTORY!', '#4CAF50', '#FFD700', victoryHovered);
     
     // Victory sparkles
     if (frameCount % 5 === 0) {
-      createParticle(300 + Math.random() * 200, 500 + Math.random() * 60, '#FFD700', 'burst', particles);
+      createParticle(victoryPos.x + (Math.random() - 0.5) * 200, victoryPos.y + (Math.random() - 0.5) * 60, '#FFD700', 'burst', particles);
     }
     
-    if (isButtonClicked(300, 500, 200, 60, mouseX, mouseY, clicked, canvas)) {
+    if (isButtonClicked(300, isLandscape ? 400 : 560, 200, 60, mouseX, mouseY, clicked, canvas)) {
       onStateChange(GAME_STATES.VICTORY);
     }
   }
