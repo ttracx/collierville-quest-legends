@@ -9,6 +9,8 @@ export interface Particle {
   life: number;
   decay: number;
   type: string;
+  rotation?: number;
+  rotationSpeed?: number;
 }
 
 export function createParticle(
@@ -18,25 +20,36 @@ export function createParticle(
   type = 'burst',
   particles: Particle[]
 ) {
-  const particle: Particle = {
-    x,
-    y,
-    vx: (Math.random() - 0.5) * 10,
-    vy: (Math.random() - 0.5) * 10,
-    size: Math.random() * 4 + 2,
-    color,
-    life: 1,
-    decay: 0.02,
-    type
-  };
+  const count = type === 'burst' ? 5 : 1;
   
-  if (type === 'trail') {
-    particle.vx *= 0.3;
-    particle.vy *= 0.3;
-    particle.decay = 0.05;
+  for (let i = 0; i < count; i++) {
+    const particle: Particle = {
+      x,
+      y,
+      vx: (Math.random() - 0.5) * 10,
+      vy: (Math.random() - 0.5) * 10,
+      size: Math.random() * 4 + 2,
+      color,
+      life: 1,
+      decay: 0.02,
+      type,
+      rotation: 0,
+      rotationSpeed: (Math.random() - 0.5) * 0.2
+    };
+    
+    if (type === 'trail') {
+      particle.vx *= 0.3;
+      particle.vy *= 0.3;
+      particle.decay = 0.05;
+    } else if (type === 'explosion') {
+      particle.vx *= 2;
+      particle.vy *= 2;
+      particle.size *= 1.5;
+      particle.decay = 0.01;
+    }
+    
+    particles.push(particle);
   }
-  
-  particles.push(particle);
 }
 
 export function updateParticles(particles: Particle[]) {
@@ -47,8 +60,14 @@ export function updateParticles(particles: Particle[]) {
     particle.vy *= 0.98;
     particle.life -= particle.decay;
     
+    if (particle.rotation !== undefined && particle.rotationSpeed !== undefined) {
+      particle.rotation += particle.rotationSpeed;
+    }
+    
     if (particle.type === 'trail') {
       particle.vy += 0.2; // gravity for trail particles
+    } else if (particle.type === 'explosion') {
+      particle.vy += 0.1; // slight gravity for explosion particles
     }
     
     return particle.life > 0;
@@ -60,9 +79,17 @@ export function drawParticles(ctx: CanvasRenderingContext2D, particles: Particle
     ctx.save();
     ctx.globalAlpha = particle.life;
     ctx.fillStyle = particle.color;
-    ctx.beginPath();
-    ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-    ctx.fill();
+    
+    if (particle.rotation !== undefined) {
+      ctx.translate(particle.x, particle.y);
+      ctx.rotate(particle.rotation);
+      ctx.fillRect(-particle.size/2, -particle.size/2, particle.size, particle.size);
+    } else {
+      ctx.beginPath();
+      ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
     ctx.restore();
   });
 }
@@ -81,7 +108,7 @@ export function drawBackgroundStars(
     }
     
     ctx.save();
-    ctx.globalAlpha = star.opacity;
+    ctx.globalAlpha = star.opacity * (0.5 + Math.sin(Date.now() * 0.001 + star.x) * 0.5);
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
     ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+
+import React, { useEffect, useRef, useState } from 'react';
 import { GameState, GAME_STATES, GameData } from '../types/gameTypes';
 import { Particle, createParticle, updateParticles, drawParticles } from '../utils/particleSystem';
 import { GameMenu } from '../components/GameMenu';
@@ -9,9 +10,11 @@ import { FrontDesk } from '../components/FrontDesk';
 import { Workout } from '../components/Workout';
 import { Smoothie } from '../components/Smoothie';
 import { Victory } from '../components/Victory';
+import { soundSystem } from '../utils/soundSystem';
 
 const Index = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -19,6 +22,35 @@ const Index = () => {
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    // Mobile-optimized canvas size
+    const updateCanvasSize = () => {
+      const container = canvas.parentElement;
+      if (!container) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const aspectRatio = 9 / 16; // Portrait aspect ratio for mobile
+      
+      let canvasWidth = Math.min(containerRect.width - 32, 400); // Max width 400px
+      let canvasHeight = canvasWidth / aspectRatio;
+      
+      // Ensure canvas fits in viewport
+      if (canvasHeight > window.innerHeight * 0.8) {
+        canvasHeight = window.innerHeight * 0.8;
+        canvasWidth = canvasHeight * aspectRatio;
+      }
+
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      canvas.style.width = `${canvasWidth}px`;
+      canvas.style.height = `${canvasHeight}px`;
+    };
+
+    updateCanvasSize();
+    window.addEventListener('resize', updateCanvasSize);
+
+    // Initialize sound system
+    soundSystem.init();
 
     // Load Xavier's image
     const xavierImage = new Image();
@@ -65,7 +97,7 @@ const Index = () => {
       completedGames: new Set()
     };
 
-    // Input handling
+    // Input handling optimized for mobile
     let mouseX = 0, mouseY = 0;
     let clicked = false;
     let keys: { [key: string]: boolean } = {};
@@ -75,7 +107,7 @@ const Index = () => {
     let backgroundStars: any[] = [];
 
     // Initialize background stars
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 30; i++) { // Reduced for mobile performance
       backgroundStars.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
@@ -85,22 +117,44 @@ const Index = () => {
       });
     }
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const getEventCoordinates = (e: MouseEvent | TouchEvent) => {
       const rect = canvas.getBoundingClientRect();
-      mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
-      mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+      let clientX, clientY;
+      
+      if ('touches' in e && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else if ('clientX' in e) {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      } else {
+        return { x: mouseX, y: mouseY };
+      }
+      
+      return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height)
+      };
     };
 
-    const handleClick = () => clicked = true;
+    const handleMouseMove = (e: MouseEvent) => {
+      const coords = getEventCoordinates(e);
+      mouseX = coords.x;
+      mouseY = coords.y;
+    };
+
+    const handleClick = () => {
+      clicked = true;
+      soundSystem.playClick();
+    };
 
     const handleTouchStart = (e: TouchEvent) => {
       e.preventDefault();
-      const rect = canvas.getBoundingClientRect();
-      if (e.touches.length > 0) {
-        mouseX = (e.touches[0].clientX - rect.left) * (canvas.width / rect.width);
-        mouseY = (e.touches[0].clientY - rect.top) * (canvas.height / rect.height);
-      }
+      const coords = getEventCoordinates(e);
+      mouseX = coords.x;
+      mouseY = coords.y;
       clicked = true;
+      soundSystem.playClick();
     };
 
     const handleKeyDown = (e: KeyboardEvent) => keys[e.key] = true;
@@ -108,7 +162,7 @@ const Index = () => {
 
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('click', handleClick);
-    canvas.addEventListener('touchstart', handleTouchStart);
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
 
@@ -143,6 +197,11 @@ const Index = () => {
 
     function handleStateChange(newState: GameState) {
       gameState = newState;
+      
+      // Add sound effects for state changes
+      if (newState === GAME_STATES.VICTORY) {
+        soundSystem.playVictory();
+      }
     }
 
     // Main game loop
@@ -153,6 +212,11 @@ const Index = () => {
 
       // Update particles
       particles = updateParticles(particles);
+
+      // Add ambient particles for atmosphere
+      if (frameCount % 120 === 0) {
+        createParticle(Math.random() * canvas.width, 0, '#ffffff', 'trail', particles);
+      }
 
       switch (gameState) {
         case GAME_STATES.MENU:
@@ -283,21 +347,33 @@ const Index = () => {
       canvas.removeEventListener('touchstart', handleTouchStart);
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('resize', updateCanvasSize);
     };
   }, []);
 
+  const toggleSound = () => {
+    const enabled = soundSystem.toggle();
+    setSoundEnabled(enabled);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-      <div className="relative">
+    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-4 relative">
+      {/* Sound toggle button */}
+      <button
+        onClick={toggleSound}
+        className="absolute top-4 right-4 z-10 bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-full transition-colors"
+      >
+        {soundEnabled ? '🔊' : '🔇'}
+      </button>
+      
+      <div className="relative flex flex-col items-center">
         <canvas
           ref={canvasRef}
-          width={800}
-          height={600}
-          className="border-2 border-orange-500 bg-gray-800 max-w-full max-h-[80vh] rounded-lg shadow-2xl"
+          className="border-2 border-orange-500 bg-gray-800 rounded-lg shadow-2xl touch-none"
           style={{ touchAction: 'none' }}
         />
-        <div className="absolute -bottom-12 left-0 right-0 text-center text-white text-sm">
-          Use mouse/touch to interact, A/D keys for workout challenge
+        <div className="mt-4 text-center text-white text-xs sm:text-sm max-w-xs">
+          Tap to interact • Use A/D keys for workout (or tap workout buttons on mobile)
         </div>
       </div>
     </div>

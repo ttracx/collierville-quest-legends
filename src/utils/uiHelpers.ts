@@ -9,7 +9,10 @@ export function drawText(
   align: CanvasTextAlign = 'center',
   shadow = false
 ) {
-  ctx.font = `${size}px Arial`;
+  // Scale text for mobile
+  const scaledSize = Math.max(size * (ctx.canvas.width / 800), 12);
+  
+  ctx.font = `${scaledSize}px Arial`;
   ctx.fillStyle = color;
   ctx.textAlign = align;
   
@@ -33,9 +36,25 @@ export function drawGradientButton(
   text: string,
   color1 = '#ff6b35',
   color2 = '#ff4500',
-  isHovered = false
+  isHovered = false,
+  pulseAnimation = 0
 ) {
-  const gradient = ctx.createLinearGradient(x, y, x, y + height);
+  // Scale button for mobile
+  const scaleX = ctx.canvas.width / 800;
+  const scaleY = ctx.canvas.height / 600;
+  const scaledWidth = width * scaleX;
+  const scaledHeight = height * scaleY;
+  const scaledX = x * scaleX;
+  const scaledY = y * scaleY;
+  
+  // Add pulse animation
+  const pulse = 1 + Math.sin(pulseAnimation) * 0.05;
+  const finalWidth = scaledWidth * pulse;
+  const finalHeight = scaledHeight * pulse;
+  const finalX = scaledX - (finalWidth - scaledWidth) / 2;
+  const finalY = scaledY - (finalHeight - scaledHeight) / 2;
+  
+  const gradient = ctx.createLinearGradient(finalX, finalY, finalX, finalY + finalHeight);
   
   if (isHovered) {
     gradient.addColorStop(0, color2);
@@ -46,17 +65,19 @@ export function drawGradientButton(
   }
   
   ctx.fillStyle = gradient;
-  ctx.fillRect(x, y, width, height);
+  ctx.fillRect(finalX, finalY, finalWidth, finalHeight);
   
   // Add glow effect
   ctx.shadowColor = color1;
   ctx.shadowBlur = isHovered ? 20 : 10;
   ctx.strokeStyle = 'white';
   ctx.lineWidth = 2;
-  ctx.strokeRect(x, y, width, height);
+  ctx.strokeRect(finalX, finalY, finalWidth, finalHeight);
   ctx.shadowBlur = 0;
   
-  drawText(ctx, text, x + width / 2, y + height / 2 + 8, 24, 'white', 'center', true);
+  // Scale text size
+  const textSize = Math.max(24 * Math.min(scaleX, scaleY), 14);
+  drawText(ctx, text, finalX + finalWidth / 2, finalY + finalHeight / 2 + textSize / 4, textSize, 'white', 'center', true);
 }
 
 export function isButtonClicked(
@@ -66,10 +87,26 @@ export function isButtonClicked(
   height: number,
   mouseX: number,
   mouseY: number,
-  clicked: boolean
+  clicked: boolean,
+  canvas?: HTMLCanvasElement
 ) {
-  return clicked && mouseX >= x && mouseX <= x + width &&
-    mouseY >= y && mouseY <= y + height;
+  if (!clicked) return false;
+  
+  // Scale coordinates for mobile
+  if (canvas) {
+    const scaleX = canvas.width / 800;
+    const scaleY = canvas.height / 600;
+    const scaledX = x * scaleX;
+    const scaledY = y * scaleY;
+    const scaledWidth = width * scaleX;
+    const scaledHeight = height * scaleY;
+    
+    return mouseX >= scaledX && mouseX <= scaledX + scaledWidth &&
+           mouseY >= scaledY && mouseY <= scaledY + scaledHeight;
+  }
+  
+  return mouseX >= x && mouseX <= x + width &&
+         mouseY >= y && mouseY <= y + height;
 }
 
 export function isButtonHovered(
@@ -78,8 +115,47 @@ export function isButtonHovered(
   width: number,
   height: number,
   mouseX: number,
-  mouseY: number
+  mouseY: number,
+  canvas?: HTMLCanvasElement
 ) {
+  // Scale coordinates for mobile
+  if (canvas) {
+    const scaleX = canvas.width / 800;
+    const scaleY = canvas.height / 600;
+    const scaledX = x * scaleX;
+    const scaledY = y * scaleY;
+    const scaledWidth = width * scaleX;
+    const scaledHeight = height * scaleY;
+    
+    return mouseX >= scaledX && mouseX <= scaledX + scaledWidth &&
+           mouseY >= scaledY && mouseY <= scaledY + scaledHeight;
+  }
+  
   return mouseX >= x && mouseX <= x + width &&
-    mouseY >= y && mouseY <= y + height;
+         mouseY >= y && mouseY <= y + height;
+}
+
+export function drawMobileWorkoutButton(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  text: string,
+  isPressed: boolean,
+  color = '#4CAF50'
+) {
+  const scaleX = ctx.canvas.width / 800;
+  const scaleY = ctx.canvas.height / 600;
+  const scaledX = x * scaleX;
+  const scaledY = y * scaleY;
+  const buttonSize = 60 * Math.min(scaleX, scaleY);
+  
+  ctx.fillStyle = isPressed ? color : '#666';
+  ctx.fillRect(scaledX - buttonSize/2, scaledY - buttonSize/2, buttonSize, buttonSize);
+  
+  ctx.strokeStyle = 'white';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(scaledX - buttonSize/2, scaledY - buttonSize/2, buttonSize, buttonSize);
+  
+  const textSize = 20 * Math.min(scaleX, scaleY);
+  drawText(ctx, text, scaledX, scaledY + textSize/4, textSize, 'white', 'center', true);
 }
