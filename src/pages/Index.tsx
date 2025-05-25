@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { GameState, GAME_STATES, GameData } from '../types/gameTypes';
 import { Particle, createParticle, updateParticles, drawParticles } from '../utils/particleSystem';
@@ -23,56 +22,63 @@ const Index = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Optimized canvas sizing for both orientations
+    // Improved canvas sizing with better viewport handling
     const updateCanvasSize = () => {
-      const container = canvas.parentElement;
-      if (!container) return;
-
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
+      
+      // Account for UI elements (header, footer, padding)
+      const availableWidth = viewportWidth - 32; // 16px padding on each side
+      const availableHeight = viewportHeight - 120; // Account for header/footer space
+      
       const isLandscape = viewportWidth > viewportHeight;
       
       let canvasWidth, canvasHeight;
       
       if (isLandscape) {
-        // Landscape: wider canvas
-        const maxWidth = Math.min(viewportWidth * 0.9, 900);
-        const maxHeight = Math.min(viewportHeight * 0.8, 600);
-        const aspectRatio = 900 / 600; // 3:2 for landscape
+        // Landscape: use 4:3 aspect ratio, prioritize width
+        const targetAspectRatio = 4 / 3;
+        canvasWidth = Math.min(availableWidth * 0.9, 800);
+        canvasHeight = canvasWidth / targetAspectRatio;
         
-        canvasWidth = maxWidth;
-        canvasHeight = canvasWidth / aspectRatio;
-        
-        if (canvasHeight > maxHeight) {
-          canvasHeight = maxHeight;
-          canvasWidth = canvasHeight * aspectRatio;
+        // If height exceeds available space, constrain by height
+        if (canvasHeight > availableHeight) {
+          canvasHeight = availableHeight;
+          canvasWidth = canvasHeight * targetAspectRatio;
         }
       } else {
-        // Portrait: taller canvas
-        const maxWidth = Math.min(viewportWidth * 0.95, 400);
-        const maxHeight = Math.min(viewportHeight * 0.75, 700);
-        const aspectRatio = 400 / 700; // Portrait ratio
+        // Portrait: use 3:4 aspect ratio, prioritize height
+        const targetAspectRatio = 3 / 4;
+        canvasHeight = Math.min(availableHeight * 0.85, 600);
+        canvasWidth = canvasHeight * targetAspectRatio;
         
-        canvasWidth = maxWidth;
-        canvasHeight = canvasWidth / aspectRatio;
-        
-        if (canvasHeight > maxHeight) {
-          canvasHeight = maxHeight;
-          canvasWidth = canvasHeight * aspectRatio;
+        // If width exceeds available space, constrain by width
+        if (canvasWidth > availableWidth) {
+          canvasWidth = availableWidth;
+          canvasHeight = canvasWidth / targetAspectRatio;
         }
       }
+
+      // Ensure minimum sizes for playability
+      canvasWidth = Math.max(canvasWidth, 300);
+      canvasHeight = Math.max(canvasHeight, 400);
 
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
       canvas.style.width = `${canvasWidth}px`;
       canvas.style.height = `${canvasHeight}px`;
+      
+      console.log(`Canvas sized: ${canvasWidth}x${canvasHeight} (${isLandscape ? 'landscape' : 'portrait'})`);
     };
 
     updateCanvasSize();
-    window.addEventListener('resize', updateCanvasSize);
-    window.addEventListener('orientationchange', () => {
-      setTimeout(updateCanvasSize, 100); // Delay for orientation change
-    });
+    
+    const handleResize = () => {
+      setTimeout(updateCanvasSize, 100);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
 
     // Initialize sound system
     soundSystem.init();
@@ -388,8 +394,8 @@ const Index = () => {
       canvas.removeEventListener('touchstart', handleTouchStart);
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keyup', handleKeyUp);
-      window.removeEventListener('resize', updateCanvasSize);
-      window.removeEventListener('orientationchange', updateCanvasSize);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
     };
   }, []);
 
@@ -399,7 +405,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-2 sm:p-4 relative">
+    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-2 sm:p-4 relative overflow-hidden">
       {/* Sound toggle button */}
       <button
         onClick={toggleSound}
@@ -408,10 +414,10 @@ const Index = () => {
         {soundEnabled ? '🔊' : '🔇'}
       </button>
       
-      <div className="relative flex flex-col items-center w-full max-w-4xl">
+      <div className="relative flex flex-col items-center w-full">
         <canvas
           ref={canvasRef}
-          className="border-2 border-orange-500 bg-gray-800 rounded-lg shadow-2xl touch-none max-w-full max-h-[75vh]"
+          className="border-2 border-orange-500 bg-gray-800 rounded-lg shadow-2xl touch-none"
           style={{ touchAction: 'none' }}
         />
         <div className="mt-2 sm:mt-4 text-center text-white text-xs sm:text-sm max-w-xs sm:max-w-md px-2">

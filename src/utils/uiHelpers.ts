@@ -9,8 +9,8 @@ export function drawText(
   align: CanvasTextAlign = 'center',
   shadow = false
 ) {
-  // Improved scaling calculation for better readability
-  const baseScale = Math.min(ctx.canvas.width / 800, ctx.canvas.height / 600);
+  // Better scaling calculation that works with both orientations
+  const baseScale = Math.min(ctx.canvas.width / 600, ctx.canvas.height / 400);
   const scaledSize = Math.max(size * baseScale, 10);
   
   ctx.font = `${scaledSize}px Arial`;
@@ -40,12 +40,15 @@ export function drawGradientButton(
   isHovered = false,
   pulseAnimation = 0
 ) {
-  // Improved scaling for different orientations
-  const baseScale = Math.min(ctx.canvas.width / 800, ctx.canvas.height / 600);
+  // Better scaling for various canvas sizes
+  const scaleX = ctx.canvas.width / 600;
+  const scaleY = ctx.canvas.height / 400;
+  const baseScale = Math.min(scaleX, scaleY);
+  
   const scaledWidth = width * baseScale;
   const scaledHeight = height * baseScale;
-  const scaledX = x * baseScale;
-  const scaledY = y * baseScale;
+  const scaledX = x * scaleX;
+  const scaledY = y * scaleY;
   
   // Add pulse animation
   const pulse = 1 + Math.sin(pulseAnimation) * 0.03;
@@ -75,7 +78,7 @@ export function drawGradientButton(
   ctx.strokeRect(finalX, finalY, finalWidth, finalHeight);
   ctx.shadowBlur = 0;
   
-  // Improved text sizing
+  // Better text sizing
   const textSize = Math.max(20 * baseScale, 12);
   drawText(ctx, text, finalX + finalWidth / 2, finalY + finalHeight / 2 + textSize / 4, textSize, 'white', 'center', true);
 }
@@ -92,11 +95,13 @@ export function isButtonClicked(
 ) {
   if (!clicked) return false;
   
-  // Improved scaling for button detection
   if (canvas) {
-    const baseScale = Math.min(canvas.width / 800, canvas.height / 600);
-    const scaledX = x * baseScale;
-    const scaledY = y * baseScale;
+    const scaleX = canvas.width / 600;
+    const scaleY = canvas.height / 400;
+    const baseScale = Math.min(scaleX, scaleY);
+    
+    const scaledX = x * scaleX;
+    const scaledY = y * scaleY;
     const scaledWidth = width * baseScale;
     const scaledHeight = height * baseScale;
     
@@ -117,11 +122,13 @@ export function isButtonHovered(
   mouseY: number,
   canvas?: HTMLCanvasElement
 ) {
-  // Improved scaling for button detection
   if (canvas) {
-    const baseScale = Math.min(canvas.width / 800, canvas.height / 600);
-    const scaledX = x * baseScale;
-    const scaledY = y * baseScale;
+    const scaleX = canvas.width / 600;
+    const scaleY = canvas.height / 400;
+    const baseScale = Math.min(scaleX, scaleY);
+    
+    const scaledX = x * scaleX;
+    const scaledY = y * scaleY;
     const scaledWidth = width * baseScale;
     const scaledHeight = height * baseScale;
     
@@ -141,9 +148,12 @@ export function drawMobileWorkoutButton(
   isPressed: boolean,
   color = '#4CAF50'
 ) {
-  const baseScale = Math.min(ctx.canvas.width / 800, ctx.canvas.height / 600);
-  const scaledX = x * baseScale;
-  const scaledY = y * baseScale;
+  const scaleX = ctx.canvas.width / 600;
+  const scaleY = ctx.canvas.height / 400;
+  const baseScale = Math.min(scaleX, scaleY);
+  
+  const scaledX = x * scaleX;
+  const scaledY = y * scaleY;
   const buttonSize = 50 * baseScale;
   
   ctx.fillStyle = isPressed ? color : '#666';
@@ -157,7 +167,7 @@ export function drawMobileWorkoutButton(
   drawText(ctx, text, scaledX, scaledY + textSize/4, textSize, 'white', 'center', true);
 }
 
-// New utility function for responsive positioning
+// Improved responsive positioning function
 export function getResponsivePosition(
   baseX: number,
   baseY: number,
@@ -165,22 +175,23 @@ export function getResponsivePosition(
   alignX: 'left' | 'center' | 'right' = 'center',
   alignY: 'top' | 'center' | 'bottom' = 'center'
 ) {
-  const baseScale = Math.min(canvas.width / 800, canvas.height / 600);
+  const scaleX = canvas.width / 600;
+  const scaleY = canvas.height / 400;
   
-  let x = baseX * baseScale;
-  let y = baseY * baseScale;
+  let x = baseX * scaleX;
+  let y = baseY * scaleY;
   
   // Adjust for alignment
   if (alignX === 'center') {
-    x = canvas.width / 2 + (baseX - 400) * baseScale;
+    x = canvas.width / 2 + (baseX - 300) * scaleX;
   } else if (alignX === 'right') {
-    x = canvas.width - (800 - baseX) * baseScale;
+    x = canvas.width - (600 - baseX) * scaleX;
   }
   
   if (alignY === 'center') {
-    y = canvas.height / 2 + (baseY - 300) * baseScale;
+    y = canvas.height / 2 + (baseY - 200) * scaleY;
   } else if (alignY === 'bottom') {
-    y = canvas.height - (600 - baseY) * baseScale;
+    y = canvas.height - (400 - baseY) * scaleY;
   }
   
   return { x, y };
