@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { GameState, GAME_STATES } from '../types/gameTypes';
 import { drawText, drawGradientButton, isButtonClicked, isButtonHovered } from '../utils/uiHelpers';
-import { drawXavier, drawMorty } from '../utils/characterDrawing';
+import { drawXavier, drawMorty, drawMike } from '../utils/characterDrawing';
 import { drawBackgroundStars, createParticle, Particle } from '../utils/particleSystem';
 import { loreManager } from '../utils/loreManager';
 
@@ -19,6 +18,8 @@ interface GameMenuProps {
   xavierImageLoaded?: boolean;
   mortyImage?: HTMLImageElement;
   mortyImageLoaded?: boolean;
+  mikeImage?: HTMLImageElement;
+  mikeImageLoaded?: boolean;
   onStateChange: (state: GameState) => void;
 }
 
@@ -35,6 +36,8 @@ export const GameMenu: React.FC<GameMenuProps> = ({
   xavierImageLoaded,
   mortyImage,
   mortyImageLoaded,
+  mikeImage,
+  mikeImageLoaded,
   onStateChange
 }) => {
   // Animated gradient background
@@ -62,26 +65,34 @@ export const GameMenu: React.FC<GameMenuProps> = ({
   drawText(ctx, 'Collierville Quest', canvas.width / 2, 170, 32, 'white', 'center', true);
   drawText(ctx, 'Starring Xavier & Morty', canvas.width / 2, 210, 20, '#ccc', 'center', true);
 
-  // Character positions and click areas
-  const xavierX = canvas.width / 2 - 80;
+  // Character positions and click areas - now with three characters
+  const xavierX = canvas.width / 2 - 120;
   const xavierY = 290;
-  const mortyX = canvas.width / 2 + 80;
+  const mortyX = canvas.width / 2;
   const mortyY = 290;
+  const mikeX = canvas.width / 2 + 120;
+  const mikeY = 290;
   const characterClickRadius = 50;
 
-  // Draw both characters with animation
+  // Draw all three characters with animation
   drawXavier(ctx, xavierX, xavierY, 1.2, true, frameCount, xavierImage, xavierImageLoaded);
   drawText(ctx, 'Xavier', xavierX, 360, 16, 'white', 'center', true);
   
   drawMorty(ctx, mortyX, mortyY, 1.2, true, frameCount, mortyImage, mortyImageLoaded);
   drawText(ctx, 'Morty', mortyX, 360, 16, 'white', 'center', true);
 
+  drawMike(ctx, mikeX, mikeY, 1.2, true, frameCount, mikeImage, mikeImageLoaded);
+  drawText(ctx, 'Mike', mikeX, 360, 16, 'white', 'center', true);
+  drawText(ctx, 'Cafe Manager', mikeX, 380, 12, '#8B4513', 'center', true);
+
   // Check for character clicks (using circular hit detection)
   const distanceToXavier = Math.sqrt(Math.pow(mouseX - xavierX, 2) + Math.pow(mouseY - xavierY, 2));
   const distanceToMorty = Math.sqrt(Math.pow(mouseX - mortyX, 2) + Math.pow(mouseY - mortyY, 2));
+  const distanceToMike = Math.sqrt(Math.pow(mouseX - mikeX, 2) + Math.pow(mouseY - mikeY, 2));
   
   const xavierHovered = distanceToXavier < characterClickRadius;
   const mortyHovered = distanceToMorty < characterClickRadius;
+  const mikeHovered = distanceToMike < characterClickRadius;
 
   // Add hover effects for characters
   if (xavierHovered) {
@@ -106,11 +117,22 @@ export const GameMenu: React.FC<GameMenuProps> = ({
     drawText(ctx, 'Click to start!', mortyX, mortyY + 80, 14, '#00BFFF', 'center', true);
   }
 
+  if (mikeHovered) {
+    ctx.save();
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = '#8B4513';
+    ctx.beginPath();
+    ctx.arc(mikeX, mikeY, characterClickRadius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    drawText(ctx, 'Click to start!', mikeX, mikeY + 80, 14, '#8B4513', 'center', true);
+  }
+
   // Handle character clicks
-  if (clicked && (xavierHovered || mortyHovered)) {
-    const clickX = xavierHovered ? xavierX : mortyX;
-    const clickY = xavierHovered ? xavierY : mortyY;
-    const clickColor = xavierHovered ? '#FFD700' : '#00BFFF';
+  if (clicked && (xavierHovered || mortyHovered || mikeHovered)) {
+    const clickX = xavierHovered ? xavierX : mortyHovered ? mortyX : mikeX;
+    const clickY = xavierHovered ? xavierY : mortyHovered ? mortyY : mikeY;
+    const clickColor = xavierHovered ? '#FFD700' : mortyHovered ? '#00BFFF' : '#8B4513';
     
     createParticle(clickX, clickY, clickColor, 'burst', particles);
     createParticle(clickX, clickY, '#FFD700', 'burst', particles);

@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { GameState, GAME_STATES } from '../types/gameTypes';
 import { drawText, drawGradientButton, isButtonClicked, isButtonHovered, getResponsivePosition } from '../utils/uiHelpers';
-import { drawXavier, drawMorty } from '../utils/characterDrawing';
+import { drawXavier, drawMorty, drawMike } from '../utils/characterDrawing';
 import { createParticle, Particle } from '../utils/particleSystem';
 
 interface GameMapProps {
@@ -19,6 +18,8 @@ interface GameMapProps {
   xavierImageLoaded?: boolean;
   mortyImage?: HTMLImageElement;
   mortyImageLoaded?: boolean;
+  mikeImage?: HTMLImageElement;
+  mikeImageLoaded?: boolean;
   onStateChange: (state: GameState) => void;
   onInitMiniGame: (state: GameState) => void;
 }
@@ -37,6 +38,8 @@ export const GameMap: React.FC<GameMapProps> = ({
   xavierImageLoaded,
   mortyImage,
   mortyImageLoaded,
+  mikeImage,
+  mikeImageLoaded,
   onStateChange,
   onInitMiniGame
 }) => {
@@ -55,21 +58,24 @@ export const GameMap: React.FC<GameMapProps> = ({
   const titleSize = isMobile ? 28 : 36;
   drawText(ctx, 'SELECT A CHALLENGE', titlePos.x, titlePos.y, titleSize, '#ff6b35', 'center', true);
 
-  // Mobile-optimized character positioning
+  // Mobile-optimized character positioning - now with three characters
   const characterY = isMobile ? (isPortrait ? 120 : 100) : 130;
-  const characterSpacing = isMobile ? 60 : 120;
-  const xavierPos = getResponsivePosition(400 - characterSpacing/2, characterY, canvas);
-  const mortyPos = getResponsivePosition(400 + characterSpacing/2, characterY, canvas);
+  const characterSpacing = isMobile ? 50 : 80;
+  const xavierPos = getResponsivePosition(400 - characterSpacing, characterY, canvas);
+  const mortyPos = getResponsivePosition(400, characterY, canvas);
+  const mikePos = getResponsivePosition(400 + characterSpacing, characterY, canvas);
   
-  const characterScale = isMobile ? 0.8 : 1;
+  const characterScale = isMobile ? 0.7 : 0.9;
   drawXavier(ctx, xavierPos.x, xavierPos.y, characterScale, true, frameCount, xavierImage, xavierImageLoaded);
   drawMorty(ctx, mortyPos.x, mortyPos.y, characterScale, true, frameCount, mortyImage, mortyImageLoaded);
+  drawMike(ctx, mikePos.x, mikePos.y, characterScale, true, frameCount, mikeImage, mikeImageLoaded);
   
-  // Add trail particles to both characters (reduced frequency on mobile)
+  // Add trail particles to all characters (reduced frequency on mobile)
   const particleFrequency = isMobile ? 60 : 30;
   if (frameCount % particleFrequency === 0) {
     createParticle(xavierPos.x + (Math.random() - 0.5) * 20, xavierPos.y + 50, '#FFD700', 'trail', particles);
     createParticle(mortyPos.x + (Math.random() - 0.5) * 20, mortyPos.y + 50, '#00BFFF', 'trail', particles);
+    createParticle(mikePos.x + (Math.random() - 0.5) * 20, mikePos.y + 50, '#8B4513', 'trail', particles);
   }
 
   // Enhanced mobile-responsive button layout
