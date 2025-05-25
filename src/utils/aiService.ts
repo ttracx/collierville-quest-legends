@@ -1,25 +1,14 @@
 
+import { AICharacter, GameLore } from '../types/loreTypes';
+
 export class AIService {
-  private apiKey: string | null = null;
+  private apiKey: string = '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';
 
-  constructor() {
-    this.apiKey = localStorage.getItem('openai_api_key');
-  }
-
-  setApiKey(key: string) {
-    this.apiKey = key;
-    localStorage.setItem('openai_api_key', key);
-  }
-
-  getApiKey(): string | null {
+  getApiKey(): string {
     return this.apiKey;
   }
 
   async generateCharacter(role: 'member' | 'trainer' | 'staff'): Promise<AICharacter | null> {
-    if (!this.apiKey) {
-      throw new Error('OpenAI API key not set');
-    }
-
     const prompt = `Generate a unique character for a fitness center game with the following role: ${role}.
 
 Please respond with a JSON object containing:
@@ -81,10 +70,6 @@ Make the character diverse, interesting, and appropriate for a family-friendly f
   }
 
   async generateLore(): Promise<GameLore | null> {
-    if (!this.apiKey) {
-      throw new Error('OpenAI API key not set');
-    }
-
     const prompt = `Create immersive lore for "LF Legends - Collierville Quest", a fitness center adventure game featuring Xavier and Morty.
 
 Please respond with a JSON object containing:
