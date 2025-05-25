@@ -330,6 +330,145 @@ export function drawMike(
   ctx.fillRect(x + 2 * scale, currentY + 30 * scale, 3 * scale, 25 * scale);
 }
 
+export function drawCarson(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  scale = 1,
+  animated = false,
+  frameCount: number,
+  carsonImage?: HTMLImageElement,
+  carsonImageLoaded?: boolean
+) {
+  const bobOffset = animated ? Math.sin(frameCount * 0.13) * 3 : 0;
+  const currentY = y + bobOffset;
+  
+  // Shadow
+  ctx.save();
+  ctx.globalAlpha = 0.3;
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.ellipse(x, y + 100 * scale, 30 * scale, 8 * scale, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  if (carsonImageLoaded && carsonImage) {
+    // Draw Carson's real photo as a circular avatar
+    ctx.save();
+    
+    // Create circular clipping path
+    ctx.beginPath();
+    ctx.arc(x, currentY - 10 * scale, 35 * scale, 0, Math.PI * 2);
+    ctx.clip();
+    
+    // Draw the image scaled and centered
+    const imgSize = 70 * scale;
+    ctx.drawImage(carsonImage, x - imgSize/2, currentY - 45 * scale, imgSize, imgSize);
+    
+    ctx.restore();
+    
+    // Add a night-themed border around Carson's photo (royal blue)
+    ctx.strokeStyle = '#4169E1';
+    ctx.lineWidth = 3 * scale;
+    ctx.beginPath();
+    ctx.arc(x, currentY - 10 * scale, 35 * scale, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    // Add glow effect
+    ctx.save();
+    ctx.shadowColor = '#4169E1';
+    ctx.shadowBlur = 10 * scale;
+    ctx.strokeStyle = '#4169E1';
+    ctx.lineWidth = 2 * scale;
+    ctx.beginPath();
+    ctx.arc(x, currentY - 10 * scale, 35 * scale, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  } else {
+    // Fallback pixel art for Carson
+    // Head
+    ctx.fillStyle = '#FDBCB4';
+    ctx.beginPath();
+    ctx.arc(x, currentY, 20 * scale, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Hair (dark hair for night shift worker)
+    const hairGradient = ctx.createRadialGradient(x, currentY - 10 * scale, 0, x, currentY - 10 * scale, 20 * scale);
+    hairGradient.addColorStop(0, '#1a1a1a');
+    hairGradient.addColorStop(1, '#0a0a0a');
+    ctx.fillStyle = hairGradient;
+    ctx.beginPath();
+    ctx.arc(x, currentY - 10 * scale, 20 * scale, Math.PI, 0);
+    ctx.fill();
+
+    // Eyes with shine (slightly tired look for night shift)
+    ctx.fillStyle = 'white';
+    ctx.fillRect(x - 8 * scale, currentY - 5 * scale, 6 * scale, 6 * scale);
+    ctx.fillRect(x + 2 * scale, currentY - 5 * scale, 6 * scale, 6 * scale);
+    ctx.fillStyle = '#2a2a2a';
+    ctx.fillRect(x - 6 * scale, currentY - 3 * scale, 3 * scale, 3 * scale);
+    ctx.fillRect(x + 3 * scale, currentY - 3 * scale, 3 * scale, 3 * scale);
+    
+    // Eye shine
+    ctx.fillStyle = 'white';
+    ctx.fillRect(x - 7 * scale, currentY - 4 * scale, 1 * scale, 1 * scale);
+    ctx.fillRect(x + 2 * scale, currentY - 4 * scale, 1 * scale, 1 * scale);
+
+    // Slight stubble/tired expression
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 1.5 * scale;
+    ctx.beginPath();
+    ctx.arc(x, currentY + 5 * scale, 6 * scale, 0, Math.PI);
+    ctx.stroke();
+
+    // Add glasses for night work
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2 * scale;
+    ctx.beginPath();
+    ctx.arc(x - 8 * scale, currentY - 2 * scale, 8 * scale, 0, Math.PI * 2);
+    ctx.arc(x + 8 * scale, currentY - 2 * scale, 8 * scale, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    // Glasses bridge
+    ctx.beginPath();
+    ctx.moveTo(x - 1 * scale, currentY - 2 * scale);
+    ctx.lineTo(x + 1 * scale, currentY - 2 * scale);
+    ctx.stroke();
+  }
+
+  // Body with gradient (night shift uniform - dark blue)
+  const bodyGradient = ctx.createLinearGradient(x - 25 * scale, currentY + 20 * scale, x + 25 * scale, currentY + 80 * scale);
+  bodyGradient.addColorStop(0, '#4169E1');
+  bodyGradient.addColorStop(1, '#2E4BC7');
+  ctx.fillStyle = bodyGradient;
+  ctx.fillRect(x - 25 * scale, currentY + 20 * scale, 50 * scale, 60 * scale);
+
+  // Arms
+  ctx.fillRect(x - 35 * scale, currentY + 25 * scale, 10 * scale, 40 * scale);
+  ctx.fillRect(x + 25 * scale, currentY + 25 * scale, 10 * scale, 40 * scale);
+
+  // Add name tag (night desk staff detail)
+  ctx.fillStyle = '#FFD700';
+  ctx.fillRect(x + 5 * scale, currentY + 35 * scale, 15 * scale, 8 * scale);
+  ctx.fillStyle = '#333';
+  ctx.font = `${4 * scale}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.fillText('CARSON', x + 12.5 * scale, currentY + 40 * scale);
+
+  // Add coffee cup (night shift essential)
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(x - 20 * scale, currentY + 50 * scale, 6 * scale, 8 * scale);
+  ctx.fillStyle = '#654321';
+  ctx.fillRect(x - 19 * scale, currentY + 52 * scale, 4 * scale, 4 * scale);
+  // Steam from coffee
+  ctx.strokeStyle = '#ccc';
+  ctx.lineWidth = 1 * scale;
+  ctx.beginPath();
+  ctx.moveTo(x - 17 * scale, currentY + 48 * scale);
+  ctx.quadraticCurveTo(x - 15 * scale, currentY + 44 * scale, x - 17 * scale, currentY + 40 * scale);
+  ctx.stroke();
+}
+
 export function drawMemberAvatar(
   ctx: CanvasRenderingContext2D,
   x: number,

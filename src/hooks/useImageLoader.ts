@@ -8,6 +8,8 @@ export const useImageLoader = () => {
   const [mortyImageLoaded, setMortyImageLoaded] = useState(false);
   const [mikeImage, setMikeImage] = useState<HTMLImageElement>();
   const [mikeImageLoaded, setMikeImageLoaded] = useState(false);
+  const [carsonImage, setCarsonImage] = useState<HTMLImageElement>();
+  const [carsonImageLoaded, setCarsonImageLoaded] = useState(false);
 
   useEffect(() => {
     // Load Xavier's image
@@ -48,6 +50,19 @@ export const useImageLoader = () => {
       setMikeImageLoaded(false);
     };
     setMikeImage(mikeImg);
+
+    // Load Carson's image (placeholder for now)
+    const carsonImg = new Image();
+    carsonImg.src = '/lovable-uploads/8131f420-fab4-4256-83b6-5f8339d387f4.png'; // Using Xavier's image as placeholder
+    carsonImg.onload = () => {
+      console.log('Carson image loaded successfully');
+      setCarsonImageLoaded(true);
+    };
+    carsonImg.onerror = (error) => {
+      console.error('Failed to load Carson image:', error);
+      setCarsonImageLoaded(false);
+    };
+    setCarsonImage(carsonImg);
   }, []);
 
   return {
@@ -56,6 +71,8 @@ export const useImageLoader = () => {
     mortyImage,
     mortyImageLoaded,
     mikeImage,
-    mikeImageLoaded
+    mikeImageLoaded,
+    carsonImage,
+    carsonImageLoaded
   };
 };

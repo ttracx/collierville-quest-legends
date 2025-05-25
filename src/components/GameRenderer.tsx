@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { GameMenu } from './GameMenu';
 import { GameMap } from './GameMap';
@@ -32,6 +31,8 @@ interface GameRendererProps {
   mortyImageLoaded: boolean;
   mikeImage?: HTMLImageElement;
   mikeImageLoaded: boolean;
+  carsonImage?: HTMLImageElement;
+  carsonImageLoaded: boolean;
   onStateChange: (state: GameState) => void;
   onUpdateGameData: (gameData: GameData) => void;
   onInitMiniGame: (state: GameState) => void;
@@ -55,6 +56,8 @@ export const GameRenderer: React.FC<GameRendererProps> = ({
   mortyImageLoaded,
   mikeImage,
   mikeImageLoaded,
+  carsonImage,
+  carsonImageLoaded,
   onStateChange,
   onUpdateGameData,
   onInitMiniGame
@@ -66,7 +69,7 @@ export const GameRenderer: React.FC<GameRendererProps> = ({
   switch (gameState) {
     case GAME_STATES.MENU:
       // Ensure images are loaded before rendering the menu
-      if (xavierImageLoaded && mortyImageLoaded && mikeImageLoaded) {
+      if (xavierImageLoaded && mortyImageLoaded && mikeImageLoaded && carsonImageLoaded) {
         GameMenu({
           ctx,
           canvas,
@@ -82,6 +85,8 @@ export const GameRenderer: React.FC<GameRendererProps> = ({
           mortyImageLoaded,
           mikeImage,
           mikeImageLoaded,
+          carsonImage,
+          carsonImageLoaded,
           onStateChange
         });
       }
