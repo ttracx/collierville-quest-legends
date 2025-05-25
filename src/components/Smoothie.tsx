@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { GameState, GAME_STATES, GameData } from '../types/gameTypes';
-import { drawText, drawGradientButton, isButtonClicked, isButtonHovered } from '../utils/uiHelpers';
+import { drawText, drawGradientButton, isButtonClicked, isButtonHovered, getResponsivePosition } from '../utils/uiHelpers';
 import { createParticle, Particle } from '../utils/particleSystem';
 import { generateRecipe, generateIngredients } from '../utils/gameUtils';
 
@@ -29,14 +30,20 @@ export const Smoothie: React.FC<SmoothieProps> = ({
   onStateChange,
   onUpdateGameData
 }) => {
-  // Gradient background
+  const isMobile = canvas.width < 768;
+  const isPortrait = canvas.height > canvas.width;
+
+  // Enhanced mobile-responsive background
   const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
   bgGradient.addColorStop(0, '#4a148c');
   bgGradient.addColorStop(1, '#6a1b9a');
   ctx.fillStyle = bgGradient;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  drawText(ctx, 'SMOOTHIE RUSH', canvas.width / 2, 60, 32, '#ff6b35', 'center', true);
+  // Mobile-optimized title
+  const titlePos = getResponsivePosition(400, 60, canvas);
+  const titleSize = isMobile ? 24 : 32;
+  drawText(ctx, 'SMOOTHIE RUSH', titlePos.x, titlePos.y, titleSize, '#ff6b35', 'center', true);
 
   const { smoothies, currentRecipe, blender, ingredients, score } = gameData.smoothie;
 
@@ -46,34 +53,114 @@ export const Smoothie: React.FC<SmoothieProps> = ({
     onUpdateGameData(gameData);
   }
 
-  // Display current recipe
-  drawText(ctx, 'Recipe:', 200, 120, 20, 'white', 'center', true);
+  // Mobile-responsive layout positioning
+  const recipeX = isPortrait ? 400 : 200;
+  const recipeY = isMobile ? (isPortrait ? 120 : 100) : 120;
+  const blenderX = isPortrait ? 400 : 600;
+  const blenderY = isPortrait ? 280 : 120;
+
+  // Display current recipe with mobile optimization
+  const recipePos = getResponsivePosition(recipeX, recipeY, canvas);
+  const recipeTextSize = isMobile ? 16 : 20;
+  drawText(ctx, 'Recipe:', recipePos.x, recipePos.y, recipeTextSize, 'white', 'center', true);
+  
   currentRecipe.forEach((item, index) => {
-    drawText(ctx, `${index + 1}. ${item}`, 200, 150 + index * 25, 16, '#FFD700', 'center');
+    const itemY = recipeY + 30 + index * (isMobile ? 20 : 25);
+    const itemPos = getResponsivePosition(recipeX, itemY, canvas);
+    const itemTextSize = isMobile ? 12 : 16;
+    drawText(ctx, `${index + 1}. ${item}`, itemPos.x, itemPos.y, itemTextSize, '#FFD700', 'center');
   });
 
-  // Display blender contents
-  drawText(ctx, 'Blender:', 600, 120, 20, 'white', 'center', true);
+  // Display blender contents with mobile optimization
+  const blenderPos = getResponsivePosition(blenderX, blenderY, canvas);
+  drawText(ctx, 'Blender:', blenderPos.x, blenderPos.y, recipeTextSize, 'white', 'center', true);
+  
   blender.forEach((item, index) => {
-    drawText(ctx, `${index + 1}. ${item}`, 600, 150 + index * 25, 16, '#4CAF50', 'center');
+    const itemY = blenderY + 30 + index * (isMobile ? 20 : 25);
+    const itemPos = getResponsivePosition(blenderX, itemY, canvas);
+    const itemTextSize = isMobile ? 12 : 16;
+    drawText(ctx, `${index + 1}. ${item}`, itemPos.x, itemPos.y, itemTextSize, '#4CAF50', 'center');
   });
 
-  // Draw ingredients
+  // Mobile-optimized ingredients layout
+  const ingredientStartY = isPortrait ? 420 : (isMobile ? 320 : 450);
+  const ingredientSpacing = isMobile ? (isPortrait ? 80 : 60) : 120;
+  const ingredientSize = isMobile ? 60 : 80;
+
   ingredients.forEach((ingredient, index) => {
-    const hovered = isButtonHovered(ingredient.x - 40, ingredient.y - 40, 80, 80, mouseX, mouseY, canvas);
+    let ingredientX, ingredientY;
     
-    ctx.fillStyle = hovered ? ingredient.color : '#333';
-    ctx.fillRect(ingredient.x - 40, ingredient.y - 40, 80, 80);
+    if (isPortrait) {
+      // Vertical layout for portrait mobile
+      ingredientX = 400;
+      ingredientY = ingredientStartY + index * 70;
+    } else {
+      // Horizontal layout for landscape
+      ingredientX = 100 + (index * ingredientSpacing);
+      ingredientY = ingredientStartY;
+    }
+
+    const ingredientPos = getResponsivePosition(ingredientX, ingredientY, canvas);
+    const buttonSize = ingredientSize;
+    
+    const hovered = isButtonHovered(
+      ingredientX - buttonSize/2, 
+      ingredientY - buttonSize/2, 
+      buttonSize, 
+      buttonSize, 
+      mouseX, 
+      mouseY, 
+      canvas
+    );
+    
+    // Enhanced mobile-friendly ingredient buttons
+    const gradient = ctx.createLinearGradient(
+      ingredientPos.x - buttonSize/2, 
+      ingredientPos.y - buttonSize/2, 
+      ingredientPos.x + buttonSize/2, 
+      ingredientPos.y + buttonSize/2
+    );
+    
+    if (hovered) {
+      gradient.addColorStop(0, ingredient.color);
+      gradient.addColorStop(1, '#333');
+    } else {
+      gradient.addColorStop(0, '#333');
+      gradient.addColorStop(1, ingredient.color);
+    }
+    
+    ctx.fillStyle = gradient;
+    ctx.fillRect(
+      ingredientPos.x - buttonSize/2, 
+      ingredientPos.y - buttonSize/2, 
+      buttonSize, 
+      buttonSize
+    );
     
     ctx.strokeStyle = ingredient.color;
-    ctx.lineWidth = 3;
-    ctx.strokeRect(ingredient.x - 40, ingredient.y - 40, 80, 80);
+    ctx.lineWidth = hovered ? 4 : 2;
+    ctx.strokeRect(
+      ingredientPos.x - buttonSize/2, 
+      ingredientPos.y - buttonSize/2, 
+      buttonSize, 
+      buttonSize
+    );
     
-    drawText(ctx, ingredient.name, ingredient.x, ingredient.y, 14, 'white', 'center');
+    const textSize = isMobile ? 10 : 14;
+    drawText(ctx, ingredient.name, ingredientPos.x, ingredientPos.y, textSize, 'white', 'center', true);
     
-    if (isButtonClicked(ingredient.x - 40, ingredient.y - 40, 80, 80, mouseX, mouseY, clicked, canvas)) {
+    if (isButtonClicked(
+      ingredientX - buttonSize/2, 
+      ingredientY - buttonSize/2, 
+      buttonSize, 
+      buttonSize, 
+      mouseX, 
+      mouseY, 
+      clicked, 
+      canvas
+    )) {
       gameData.smoothie.blender.push(ingredient.name);
-      createParticle(ingredient.x, ingredient.y, ingredient.color, 'burst', particles);
+      createParticle(ingredientPos.x, ingredientPos.y, ingredient.color, 'burst', particles);
       
       // Check if recipe is complete
       if (gameData.smoothie.blender.length === currentRecipe.length) {
@@ -82,7 +169,7 @@ export const Smoothie: React.FC<SmoothieProps> = ({
         if (isCorrect) {
           gameData.smoothie.smoothies++;
           gameData.smoothie.score += 100;
-          createParticle(600, 200, '#4CAF50', 'burst', particles);
+          createParticle(blenderPos.x, blenderPos.y, '#4CAF50', 'burst', particles);
           
           if (gameData.smoothie.smoothies >= 5) {
             gameData.totalScore += gameData.smoothie.score;
@@ -95,7 +182,7 @@ export const Smoothie: React.FC<SmoothieProps> = ({
           // Generate new recipe
           gameData.smoothie.currentRecipe = generateRecipe();
         } else {
-          createParticle(600, 200, '#f44336', 'burst', particles);
+          createParticle(blenderPos.x, blenderPos.y, '#f44336', 'burst', particles);
         }
         
         // Clear blender
@@ -106,31 +193,117 @@ export const Smoothie: React.FC<SmoothieProps> = ({
     }
   });
 
-  // Draw blender
+  // Mobile-optimized blender visual
+  const blenderVisualY = isPortrait ? 200 : 250;
+  const blenderVisualPos = getResponsivePosition(blenderX, blenderVisualY, canvas);
+  const blenderWidth = isMobile ? 80 : 100;
+  const blenderHeight = isMobile ? 120 : 150;
+
   ctx.fillStyle = '#555';
-  ctx.fillRect(550, 250, 100, 150);
+  ctx.fillRect(
+    blenderVisualPos.x - blenderWidth/2, 
+    blenderVisualPos.y - blenderHeight/2, 
+    blenderWidth, 
+    blenderHeight
+  );
   ctx.strokeStyle = 'white';
   ctx.lineWidth = 3;
-  ctx.strokeRect(550, 250, 100, 150);
+  ctx.strokeRect(
+    blenderVisualPos.x - blenderWidth/2, 
+    blenderVisualPos.y - blenderHeight/2, 
+    blenderWidth, 
+    blenderHeight
+  );
 
-  // Clear blender button
-  const clearHovered = isButtonHovered(550, 420, 100, 40, mouseX, mouseY, canvas);
-  drawGradientButton(ctx, 550, 420, 100, 40, 'CLEAR', '#f44336', '#d32f2f', clearHovered);
+  // Mobile-optimized clear button
+  const clearButtonY = blenderVisualY + blenderHeight/2 + (isMobile ? 30 : 40);
+  const clearButtonPos = getResponsivePosition(blenderX, clearButtonY, canvas);
+  const clearButtonWidth = isMobile ? 80 : 100;
+  const clearButtonHeight = isMobile ? 35 : 40;
   
-  if (isButtonClicked(550, 420, 100, 40, mouseX, mouseY, clicked, canvas)) {
+  const clearHovered = isButtonHovered(
+    blenderX - clearButtonWidth/2, 
+    clearButtonY - clearButtonHeight/2, 
+    clearButtonWidth, 
+    clearButtonHeight, 
+    mouseX, 
+    mouseY, 
+    canvas
+  );
+  
+  drawGradientButton(
+    ctx, 
+    blenderX - clearButtonWidth/2, 
+    clearButtonY - clearButtonHeight/2, 
+    clearButtonWidth, 
+    clearButtonHeight, 
+    'CLEAR', 
+    '#f44336', 
+    '#d32f2f', 
+    clearHovered
+  );
+  
+  if (isButtonClicked(
+    blenderX - clearButtonWidth/2, 
+    clearButtonY - clearButtonHeight/2, 
+    clearButtonWidth, 
+    clearButtonHeight, 
+    mouseX, 
+    mouseY, 
+    clicked, 
+    canvas
+  )) {
     gameData.smoothie.blender = [];
     onUpdateGameData(gameData);
   }
 
-  // Game info
-  drawText(ctx, `Smoothies: ${smoothies}/5`, 100, 500, 20, 'white');
-  drawText(ctx, `Score: ${score}`, 300, 500, 20, 'white');
-
-  // Back to map button
-  const backHovered = isButtonHovered(600, 500, 150, 40, mouseX, mouseY, canvas);
-  drawGradientButton(ctx, 600, 500, 150, 40, 'BACK TO MAP', '#2196F3', '#1976D2', backHovered);
+  // Mobile-optimized game info positioning
+  const infoY = canvas.height - (isMobile ? 80 : 100);
+  const smoothiesPos = getResponsivePosition(150, infoY, canvas);
+  const scorePos = getResponsivePosition(400, infoY, canvas);
+  const infoTextSize = isMobile ? 16 : 20;
   
-  if (isButtonClicked(600, 500, 150, 40, mouseX, mouseY, clicked, canvas)) {
+  drawText(ctx, `Smoothies: ${smoothies}/5`, smoothiesPos.x, smoothiesPos.y, infoTextSize, 'white', 'center', true);
+  drawText(ctx, `Score: ${score}`, scorePos.x, scorePos.y, infoTextSize, 'white', 'center', true);
+
+  // Mobile-optimized back button
+  const backButtonY = canvas.height - (isMobile ? 40 : 60);
+  const backButtonPos = getResponsivePosition(650, backButtonY, canvas);
+  const backButtonWidth = isMobile ? 120 : 150;
+  const backButtonHeight = isMobile ? 35 : 40;
+  
+  const backHovered = isButtonHovered(
+    650 - backButtonWidth/2, 
+    backButtonY - backButtonHeight/2, 
+    backButtonWidth, 
+    backButtonHeight, 
+    mouseX, 
+    mouseY, 
+    canvas
+  );
+  
+  drawGradientButton(
+    ctx, 
+    650 - backButtonWidth/2, 
+    backButtonY - backButtonHeight/2, 
+    backButtonWidth, 
+    backButtonHeight, 
+    'BACK TO MAP', 
+    '#2196F3', 
+    '#1976D2', 
+    backHovered
+  );
+  
+  if (isButtonClicked(
+    650 - backButtonWidth/2, 
+    backButtonY - backButtonHeight/2, 
+    backButtonWidth, 
+    backButtonHeight, 
+    mouseX, 
+    mouseY, 
+    clicked, 
+    canvas
+  )) {
     onStateChange(GAME_STATES.MAP);
   }
 
