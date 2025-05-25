@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { Particle, updateParticles, createParticle } from '../utils/particleSystem';
+import { Particle, updateParticles as updateParticleSystem, createParticle } from '../utils/particleSystem';
 import { useIsMobile } from './use-mobile';
 
 export const useCanvasInteraction = () => {
@@ -85,13 +85,14 @@ export const useCanvasInteraction = () => {
   };
 
   const updateParticles = () => {
-    setParticles(prev => updateParticles(prev));
+    setParticles(prev => updateParticleSystem(prev));
     
     // Add occasional particles
     if (frameCount % 120 === 0 && canvas) {
       setParticles(prev => {
-        createParticle(Math.random() * canvas.width, 0, '#ffffff', 'trail', prev);
-        return [...prev];
+        const newParticles = [...prev];
+        createParticle(Math.random() * canvas.width, 0, '#ffffff', 'trail', newParticles);
+        return newParticles;
       });
     }
   };

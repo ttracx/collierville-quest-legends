@@ -61,6 +61,11 @@ const App: React.FC = () => {
     }
   }, [ctx, canvas, gameState, mouseX, mouseY, clicked, backgroundStars, gameData, xavierImage, xavierImageLoaded, mortyImage, mortyImageLoaded, mikeImage, mikeImageLoaded, keys]);
 
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const nativeEvent = e.nativeEvent;
+    handleMouseMove(nativeEvent);
+  };
+
   return (
     <canvas
       ref={ref => {
@@ -73,7 +78,7 @@ const App: React.FC = () => {
       }}
       style={{ background: 'black' }}
       onClick={handleClick}
-      onMouseMove={handleMouseMove}
+      onMouseMove={handleCanvasMouseMove}
     />
   );
 };
