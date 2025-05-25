@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { GameState, GAME_STATES, GameData } from '../types/gameTypes';
 import { Particle, createParticle, updateParticles, drawParticles } from '../utils/particleSystem';
@@ -108,6 +107,45 @@ const Index = () => {
         blender: [],
         ingredients: [],
         score: 0
+      },
+      basketball: {
+        shots: 0,
+        makes: 0,
+        ballX: 400,
+        ballY: 500,
+        ballVelocityX: 0,
+        ballVelocityY: 0,
+        isCharging: false,
+        chargePower: 0,
+        timer: 0,
+        score: 0,
+      },
+      swimming: {
+        laps: 0,
+        position: 100,
+        speed: 0,
+        stamina: 100,
+        rhythm: 0,
+        timer: 0,
+        score: 0,
+      },
+      yoga: {
+        currentPose: 'Mountain Pose',
+        poseTimer: 15,
+        posesCompleted: 0,
+        balance: 50,
+        breathing: 50,
+        timer: 0,
+        score: 0,
+      },
+      cardio: {
+        currentExercise: 'Running',
+        intensity: 50,
+        heartRate: 80,
+        calories: 0,
+        exerciseTimer: 15,
+        timer: 0,
+        score: 0,
       },
       totalScore: 0,
       completedGames: new Set()
