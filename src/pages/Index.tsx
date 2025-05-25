@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { GameState, GAME_STATES, GameData } from '../types/gameTypes';
 import { Particle, createParticle, updateParticles, drawParticles } from '../utils/particleSystem';
@@ -376,6 +375,21 @@ const Index = () => {
           Tap to interact • Use A/D keys for workout (or tap workout buttons on mobile)
         </div>
       </div>
+      
+      {/* Footer */}
+      <footer className="mt-8 text-center">
+        <p className="text-gray-400 text-sm">
+          Lifetime Legends by{' '}
+          <a 
+            href="https://tunaas.ai" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-orange-500 hover:text-orange-400 transition-colors"
+          >
+            Tunaas.ai
+          </a>
+        </p>
+      </footer>
     </div>
   );
 };
