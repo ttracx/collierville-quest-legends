@@ -48,9 +48,9 @@ export const Cardio: React.FC<CardioProps> = ({
   }
 
   // Dynamic background based on intensity
-  const intensityColor = Math.floor(cardioData.intensity / 20);
+  const backgroundIntensityIndex = Math.floor(cardioData.intensity / 20);
   const bgColors = ['#2c3e50', '#e74c3c', '#e67e22', '#f39c12', '#27ae60'];
-  const bgColor = bgColors[Math.min(intensityColor, 4)];
+  const bgColor = bgColors[Math.min(backgroundIntensityIndex, 4)];
   
   ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -178,8 +178,8 @@ export const Cardio: React.FC<CardioProps> = ({
   ctx.fillStyle = '#333';
   ctx.fillRect(canvas.width - 250, 150, 200, 20);
   
-  const intensityColor = cardioData.intensity > 80 ? '#ff4444' : cardioData.intensity > 50 ? '#ffaa00' : '#4CAF50';
-  ctx.fillStyle = intensityColor;
+  const meterColor = cardioData.intensity > 80 ? '#ff4444' : cardioData.intensity > 50 ? '#ffaa00' : '#4CAF50';
+  ctx.fillStyle = meterColor;
   ctx.fillRect(canvas.width - 250, 150, (cardioData.intensity / 100) * 200, 20);
   
   drawText(ctx, `Intensity: ${Math.round(cardioData.intensity)}%`, canvas.width - 250, 140, 16, 'white', 'left');
