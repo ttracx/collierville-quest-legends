@@ -40,6 +40,9 @@ export const GameMap: React.FC<GameMapProps> = ({
   onStateChange,
   onInitMiniGame
 }) => {
+  const isMobile = canvas.width < 768;
+  const isPortrait = canvas.height > canvas.width;
+
   // Animated background
   const mapGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
   mapGradient.addColorStop(0, '#3c3c3c');
@@ -47,84 +50,85 @@ export const GameMap: React.FC<GameMapProps> = ({
   ctx.fillStyle = mapGradient;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Responsive positioning for title
-  const titlePos = getResponsivePosition(400, 80, canvas);
-  drawText(ctx, 'SELECT A CHALLENGE', titlePos.x, titlePos.y, 36, '#ff6b35', 'center', true);
+  // Mobile-optimized title positioning
+  const titlePos = getResponsivePosition(400, isMobile ? 60 : 80, canvas);
+  const titleSize = isMobile ? 28 : 36;
+  drawText(ctx, 'SELECT A CHALLENGE', titlePos.x, titlePos.y, titleSize, '#ff6b35', 'center', true);
 
-  // Draw characters with responsive positioning
-  const xavierPos = getResponsivePosition(340, 130, canvas);
-  const mortyPos = getResponsivePosition(460, 130, canvas);
+  // Mobile-optimized character positioning
+  const characterY = isMobile ? (isPortrait ? 120 : 100) : 130;
+  const characterSpacing = isMobile ? 60 : 120;
+  const xavierPos = getResponsivePosition(400 - characterSpacing/2, characterY, canvas);
+  const mortyPos = getResponsivePosition(400 + characterSpacing/2, characterY, canvas);
   
-  drawXavier(ctx, xavierPos.x, xavierPos.y, 1, true, frameCount, xavierImage, xavierImageLoaded);
-  drawMorty(ctx, mortyPos.x, mortyPos.y, 1, true, frameCount, mortyImage, mortyImageLoaded);
+  const characterScale = isMobile ? 0.8 : 1;
+  drawXavier(ctx, xavierPos.x, xavierPos.y, characterScale, true, frameCount, xavierImage, xavierImageLoaded);
+  drawMorty(ctx, mortyPos.x, mortyPos.y, characterScale, true, frameCount, mortyImage, mortyImageLoaded);
   
-  // Add trail particles to both characters
-  if (frameCount % 30 === 0) {
+  // Add trail particles to both characters (reduced frequency on mobile)
+  const particleFrequency = isMobile ? 60 : 30;
+  if (frameCount % particleFrequency === 0) {
     createParticle(xavierPos.x + (Math.random() - 0.5) * 20, xavierPos.y + 50, '#FFD700', 'trail', particles);
     createParticle(mortyPos.x + (Math.random() - 0.5) * 20, mortyPos.y + 50, '#00BFFF', 'trail', particles);
   }
 
-  // Dynamic button positioning based on screen orientation
-  const isLandscape = canvas.width > canvas.height;
-  
+  // Enhanced mobile-responsive button layout
   let games;
-  if (isLandscape) {
-    // Horizontal layout for landscape
+  const buttonWidth = isMobile ? 140 : 150;
+  const buttonHeight = isMobile ? 70 : 80;
+  
+  if (isPortrait || isMobile) {
+    // Vertical layout optimized for mobile portrait
+    const startY = isMobile ? 200 : 220;
+    const spacing = isMobile ? 90 : 100;
     games = [
-      { name: 'Front Desk\nCheck-In', state: GAME_STATES.FRONTDESK, x: 200, y: 200 },
-      { name: 'Workout\nChallenge', state: GAME_STATES.WORKOUT, x: 400, y: 200 },
-      { name: 'Smoothie\nRush', state: GAME_STATES.SMOOTHIE, x: 600, y: 200 }
+      { name: 'Front Desk\nCheck-In', state: GAME_STATES.FRONTDESK, x: 400, y: startY },
+      { name: 'Workout\nChallenge', state: GAME_STATES.WORKOUT, x: 400, y: startY + spacing },
+      { name: 'Smoothie\nRush', state: GAME_STATES.SMOOTHIE, x: 400, y: startY + spacing * 2 }
     ];
   } else {
-    // Vertical layout for portrait
+    // Horizontal layout for landscape
+    const buttonY = isMobile ? 180 : 200;
     games = [
-      { name: 'Front Desk\nCheck-In', state: GAME_STATES.FRONTDESK, x: 400, y: 220 },
-      { name: 'Workout\nChallenge', state: GAME_STATES.WORKOUT, x: 400, y: 320 },
-      { name: 'Smoothie\nRush', state: GAME_STATES.SMOOTHIE, x: 400, y: 420 }
+      { name: 'Front Desk\nCheck-In', state: GAME_STATES.FRONTDESK, x: 200, y: buttonY },
+      { name: 'Workout\nChallenge', state: GAME_STATES.WORKOUT, x: 400, y: buttonY },
+      { name: 'Smoothie\nRush', state: GAME_STATES.SMOOTHIE, x: 600, y: buttonY }
     ];
   }
 
   games.forEach(game => {
     const gamePos = getResponsivePosition(game.x, game.y, canvas);
     const completed = completedGames.has(game.state);
-    const hovered = isButtonHovered(game.x, game.y, 150, 80, mouseX, mouseY, canvas);
+    const hovered = isButtonHovered(game.x, game.y, buttonWidth, buttonHeight, mouseX, mouseY, canvas);
     const color1 = completed ? '#4CAF50' : '#ff6b35';
     const color2 = completed ? '#388E3C' : '#ff4500';
 
-    // Enhanced button with gradient and glow
-    const gradient = ctx.createLinearGradient(gamePos.x - 75, gamePos.y - 40, gamePos.x - 75, gamePos.y + 40);
-    gradient.addColorStop(0, hovered ? color2 : color1);
-    gradient.addColorStop(1, hovered ? color1 : color2);
-    
-    ctx.fillStyle = gradient;
-    ctx.fillRect(gamePos.x - 75, gamePos.y - 40, 150, 80);
-    
-    if (hovered || completed) {
-      ctx.shadowColor = color1;
-      ctx.shadowBlur = 15;
-    }
-    
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(gamePos.x - 75, gamePos.y - 40, 150, 80);
-    ctx.shadowBlur = 0;
+    // Enhanced button with mobile-optimized sizing
+    drawGradientButton(ctx, game.x, game.y, buttonWidth, buttonHeight, '', color1, color2, hovered);
 
+    // Mobile-optimized text rendering
     const lines = game.name.split('\n');
+    const textSize = isMobile ? 14 : 16;
+    const lineSpacing = isMobile ? 18 : 20;
+    
     lines.forEach((line, i) => {
-      drawText(ctx, line, gamePos.x, gamePos.y - 10 + i * 20, 16, 'white', 'center', true);
+      const yOffset = lines.length === 1 ? 0 : (i - (lines.length - 1) / 2) * lineSpacing;
+      drawText(ctx, line, gamePos.x, gamePos.y + yOffset, textSize, 'white', 'center', true);
     });
 
     if (completed) {
       ctx.save();
       ctx.shadowColor = '#4CAF50';
       ctx.shadowBlur = 10;
-      drawText(ctx, '✓', gamePos.x, gamePos.y + 25, 30, '#4CAF50', 'center');
+      const checkSize = isMobile ? 24 : 30;
+      const checkY = gamePos.y + (lines.length > 1 ? 25 : 20);
+      drawText(ctx, '✓', gamePos.x, checkY, checkSize, '#4CAF50', 'center');
       ctx.restore();
     }
 
-    if (!completed && isButtonClicked(game.x, game.y, 150, 80, mouseX, mouseY, clicked, canvas)) {
+    if (!completed && isButtonClicked(game.x, game.y, buttonWidth, buttonHeight, mouseX, mouseY, clicked, canvas)) {
       // Create explosion effect
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < (isMobile ? 5 : 10); i++) {
         createParticle(gamePos.x, gamePos.y, color1, 'burst', particles);
       }
       onInitMiniGame(game.state);
@@ -132,22 +136,29 @@ export const GameMap: React.FC<GameMapProps> = ({
     }
   });
 
-  // Animated score display
+  // Mobile-optimized score display
   const scoreFloat = Math.sin(frameCount * 0.1) * 2;
-  const scorePos = getResponsivePosition(400, isLandscape ? 350 : 520, canvas);
-  drawText(ctx, `Score: ${totalScore}`, scorePos.x, scorePos.y + scoreFloat, 24, 'white', 'center', true);
+  const scoreY = isPortrait ? 
+    (isMobile ? games[games.length - 1].y + 120 : 520) : 
+    (isMobile ? 280 : 350);
+  const scorePos = getResponsivePosition(400, scoreY, canvas);
+  const scoreSize = isMobile ? 20 : 24;
+  drawText(ctx, `Score: ${totalScore}`, scorePos.x, scorePos.y + scoreFloat, scoreSize, 'white', 'center', true);
 
   if (completedGames.size === 3) {
-    const victoryPos = getResponsivePosition(400, isLandscape ? 400 : 560, canvas);
-    const victoryHovered = isButtonHovered(300, isLandscape ? 400 : 560, 200, 60, mouseX, mouseY, canvas);
-    drawGradientButton(ctx, 300, isLandscape ? 400 : 560, 200, 60, 'VICTORY!', '#4CAF50', '#FFD700', victoryHovered);
+    const victoryY = scoreY + (isMobile ? 50 : 60);
+    const victoryPos = getResponsivePosition(400, victoryY, canvas);
+    const victoryHovered = isButtonHovered(300, victoryY, 200, 60, mouseX, mouseY, canvas);
     
-    // Victory sparkles
-    if (frameCount % 5 === 0) {
+    drawGradientButton(ctx, 300, victoryY, 200, 60, 'VICTORY!', '#4CAF50', '#FFD700', victoryHovered);
+    
+    // Victory sparkles (reduced on mobile)
+    const sparkleFrequency = isMobile ? 10 : 5;
+    if (frameCount % sparkleFrequency === 0) {
       createParticle(victoryPos.x + (Math.random() - 0.5) * 200, victoryPos.y + (Math.random() - 0.5) * 60, '#FFD700', 'burst', particles);
     }
     
-    if (isButtonClicked(300, isLandscape ? 400 : 560, 200, 60, mouseX, mouseY, clicked, canvas)) {
+    if (isButtonClicked(300, victoryY, 200, 60, mouseX, mouseY, clicked, canvas)) {
       onStateChange(GAME_STATES.VICTORY);
     }
   }

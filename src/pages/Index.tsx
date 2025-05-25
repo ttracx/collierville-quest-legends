@@ -11,10 +11,12 @@ import { Workout } from '../components/Workout';
 import { Smoothie } from '../components/Smoothie';
 import { Victory } from '../components/Victory';
 import { soundSystem } from '../utils/soundSystem';
+import { useIsMobile } from '../hooks/use-mobile';
 
 const Index = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -23,18 +25,24 @@ const Index = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Fullscreen canvas sizing optimized for all devices
+    // Enhanced mobile-first canvas sizing
     const updateCanvasSize = () => {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
       
-      // Use full viewport for immersive experience
-      canvas.width = viewportWidth;
-      canvas.height = viewportHeight;
-      canvas.style.width = `${viewportWidth}px`;
-      canvas.style.height = `${viewportHeight}px`;
+      // Account for iOS Safari's dynamic viewport and safe areas
+      const actualHeight = window.visualViewport ? window.visualViewport.height : viewportHeight;
       
-      console.log(`Canvas sized: ${viewportWidth}x${viewportHeight} (fullscreen)`);
+      // Use full viewport for immersive experience on mobile
+      canvas.width = viewportWidth;
+      canvas.height = actualHeight;
+      canvas.style.width = `${viewportWidth}px`;
+      canvas.style.height = `${actualHeight}px`;
+      
+      // Prevent zoom on iOS
+      canvas.style.touchAction = 'manipulation';
+      
+      console.log(`Canvas sized: ${viewportWidth}x${actualHeight} (mobile-optimized)`);
     };
 
     updateCanvasSize();
@@ -43,8 +51,19 @@ const Index = () => {
       setTimeout(updateCanvasSize, 100);
     };
     
+    const handleVisualViewportChange = () => {
+      if (window.visualViewport) {
+        setTimeout(updateCanvasSize, 100);
+      }
+    };
+    
     window.addEventListener('resize', handleResize);
     window.addEventListener('orientationchange', handleResize);
+    
+    // iOS Safari viewport handling
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleVisualViewportChange);
+    }
 
     // Initialize sound system
     soundSystem.init();
@@ -94,19 +113,21 @@ const Index = () => {
       completedGames: new Set()
     };
 
-    // Input handling optimized for mobile
+    // Enhanced mobile input handling
     let mouseX = 0, mouseY = 0;
     let clicked = false;
     let keys: { [key: string]: boolean } = {};
+    let lastTouchTime = 0;
 
     // Animation and effects
     let particles: Particle[] = [];
     let backgroundStars: any[] = [];
 
-    // Initialize background stars with dynamic count based on screen size
+    // Initialize background stars with mobile-optimized count
     const getStarCount = () => {
       const area = canvas.width * canvas.height;
-      return Math.max(30, Math.min(100, Math.floor(area / 20000)));
+      const baseCount = isMobile ? 20 : 50; // Fewer stars on mobile for performance
+      return Math.max(baseCount, Math.min(80, Math.floor(area / 25000)));
     };
 
     const initializeStars = () => {
@@ -132,6 +153,9 @@ const Index = () => {
       if ('touches' in e && e.touches.length > 0) {
         clientX = e.touches[0].clientX;
         clientY = e.touches[0].clientY;
+      } else if ('changedTouches' in e && e.changedTouches.length > 0) {
+        clientX = e.changedTouches[0].clientX;
+        clientY = e.changedTouches[0].clientY;
       } else if ('clientX' in e) {
         clientX = e.clientX;
         clientY = e.clientY;
@@ -161,16 +185,38 @@ const Index = () => {
       const coords = getEventCoordinates(e);
       mouseX = coords.x;
       mouseY = coords.y;
+      
+      // Prevent double-tap zoom on iOS
+      const now = Date.now();
+      if (now - lastTouchTime < 300) {
+        e.preventDefault();
+      }
+      lastTouchTime = now;
+      
       clicked = true;
       soundSystem.playClick();
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      const coords = getEventCoordinates(e);
+      mouseX = coords.x;
+      mouseY = coords.y;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
     };
 
     const handleKeyDown = (e: KeyboardEvent) => keys[e.key] = true;
     const handleKeyUp = (e: KeyboardEvent) => keys[e.key] = false;
 
+    // Enhanced event listeners for mobile
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('click', handleClick);
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
 
@@ -217,17 +263,18 @@ const Index = () => {
       }
     }
 
-    // Main game loop
+    // Main game loop with mobile optimizations
     let frameCount = 0;
 
     function gameLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Update particles
+      // Update particles with mobile performance considerations
       particles = updateParticles(particles);
 
-      // Add ambient particles for atmosphere
-      if (frameCount % 120 === 0) {
+      // Reduce particle frequency on mobile for better performance
+      const particleFrequency = isMobile ? 240 : 120;
+      if (frameCount % particleFrequency === 0) {
         createParticle(Math.random() * canvas.width, 0, '#ffffff', 'trail', particles);
       }
 
@@ -358,12 +405,18 @@ const Index = () => {
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('click', handleClick);
       canvas.removeEventListener('touchstart', handleTouchStart);
+      canvas.removeEventListener('touchmove', handleTouchMove);
+      canvas.removeEventListener('touchend', handleTouchEnd);
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keyup', handleKeyUp);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
+      
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleVisualViewportChange);
+      }
     };
-  }, []);
+  }, [isMobile]);
 
   const toggleSound = () => {
     const enabled = soundSystem.toggle();
@@ -372,29 +425,43 @@ const Index = () => {
 
   return (
     <div className="fixed inset-0 bg-gray-900 flex items-center justify-center overflow-hidden">
-      {/* Sound toggle button */}
+      {/* Enhanced mobile-optimized sound toggle button */}
       <button
         onClick={toggleSound}
-        className="absolute top-4 right-4 z-20 bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full transition-colors text-xl shadow-lg"
+        className={`absolute top-2 right-2 z-20 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-colors shadow-lg ${
+          isMobile ? 'p-2 text-lg' : 'p-3 text-xl'
+        }`}
+        style={{ 
+          minHeight: isMobile ? '44px' : 'auto',
+          minWidth: isMobile ? '44px' : 'auto',
+          touchAction: 'manipulation'
+        }}
       >
         {soundEnabled ? '🔊' : '🔇'}
       </button>
       
       <canvas
         ref={canvasRef}
-        className="block touch-none"
-        style={{ touchAction: 'none' }}
+        className="block"
+        style={{ 
+          touchAction: 'manipulation',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          WebkitTouchCallout: 'none',
+          WebkitTapHighlightColor: 'transparent'
+        }}
       />
       
-      {/* Minimal footer */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20">
-        <p className="text-gray-400 text-xs text-center">
+      {/* Enhanced footer for mobile */}
+      <div className={`absolute ${isMobile ? 'bottom-1' : 'bottom-4'} left-1/2 transform -translate-x-1/2 z-20`}>
+        <p className={`text-gray-400 text-center ${isMobile ? 'text-xs' : 'text-xs'}`}>
           by{' '}
           <a 
             href="https://tunaas.ai" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-orange-500 hover:text-orange-400 transition-colors"
+            style={{ touchAction: 'manipulation' }}
           >
             Tunaas.ai
           </a>
