@@ -13,10 +13,19 @@ const Index = () => {
     // Load Xavier's image
     const xavierImage = new Image();
     xavierImage.src = '/lovable-uploads/8131f420-fab4-4256-83b6-5f8339d387f4.png';
-    let imageLoaded = false;
+    let xavierImageLoaded = false;
     
     xavierImage.onload = () => {
-      imageLoaded = true;
+      xavierImageLoaded = true;
+    };
+
+    // Load Morty's (Clark's) image
+    const mortyImage = new Image();
+    mortyImage.src = '/lovable-uploads/7bd337f7-c72b-48c2-a522-fc4dea130240.png';
+    let mortyImageLoaded = false;
+    
+    mortyImage.onload = () => {
+      mortyImageLoaded = true;
     };
 
     // Game states
@@ -204,7 +213,7 @@ const Index = () => {
         mouseY >= y && mouseY <= y + height;
     }
 
-    // Enhanced character drawing functions with Xavier's real image
+    // Enhanced character drawing functions with Xavier's and Morty's real images
     function drawXavier(x: number, y: number, scale = 1, animated = false) {
       const bobOffset = animated ? Math.sin(frameCount * 0.1) * 3 : 0;
       const currentY = y + bobOffset;
@@ -218,7 +227,7 @@ const Index = () => {
       ctx.fill();
       ctx.restore();
 
-      if (imageLoaded) {
+      if (xavierImageLoaded) {
         // Draw Xavier's real photo as a circular avatar
         ctx.save();
         
@@ -251,7 +260,6 @@ const Index = () => {
         ctx.stroke();
         ctx.restore();
       } else {
-        // Fallback to original pixel art if image hasn't loaded
         // Head
         ctx.fillStyle = '#8B6F47';
         ctx.beginPath();
@@ -310,6 +318,107 @@ const Index = () => {
       ctx.fillRect(x + 25 * scale, currentY + 25 * scale, 10 * scale, 40 * scale);
     }
 
+    // New function to draw Morty (Clark Kirby) with his hilarious avatar
+    function drawMorty(x: number, y: number, scale = 1, animated = false) {
+      const bobOffset = animated ? Math.sin(frameCount * 0.12) * 3 : 0;
+      const currentY = y + bobOffset;
+      
+      // Shadow
+      ctx.save();
+      ctx.globalAlpha = 0.3;
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.ellipse(x, y + 100 * scale, 30 * scale, 8 * scale, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      if (mortyImageLoaded) {
+        // Draw Morty's real photo as a circular avatar
+        ctx.save();
+        
+        // Create circular clipping path
+        ctx.beginPath();
+        ctx.arc(x, currentY - 10 * scale, 35 * scale, 0, Math.PI * 2);
+        ctx.clip();
+        
+        // Draw the image scaled and centered
+        const imgSize = 70 * scale;
+        ctx.drawImage(mortyImage, x - imgSize/2, currentY - 45 * scale, imgSize, imgSize);
+        
+        ctx.restore();
+        
+        // Add a fun border around Morty's photo (bright blue like his shirt)
+        ctx.strokeStyle = '#00BFFF';
+        ctx.lineWidth = 3 * scale;
+        ctx.beginPath();
+        ctx.arc(x, currentY - 10 * scale, 35 * scale, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // Add glow effect
+        ctx.save();
+        ctx.shadowColor = '#00BFFF';
+        ctx.shadowBlur = 10 * scale;
+        ctx.strokeStyle = '#00BFFF';
+        ctx.lineWidth = 2 * scale;
+        ctx.beginPath();
+        ctx.arc(x, currentY - 10 * scale, 35 * scale, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        // Fallback pixel art for Morty
+        // Head
+        ctx.fillStyle = '#FDBCB4';
+        ctx.beginPath();
+        ctx.arc(x, currentY, 20 * scale, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Hair (brown)
+        const hairGradient = ctx.createRadialGradient(x, currentY - 10 * scale, 0, x, currentY - 10 * scale, 20 * scale);
+        hairGradient.addColorStop(0, '#8B4513');
+        hairGradient.addColorStop(1, '#654321');
+        ctx.fillStyle = hairGradient;
+        ctx.beginPath();
+        ctx.arc(x, currentY - 10 * scale, 20 * scale, Math.PI, 0);
+        ctx.fill();
+
+        // Eyes with shine
+        ctx.fillStyle = 'white';
+        ctx.fillRect(x - 8 * scale, currentY - 5 * scale, 6 * scale, 6 * scale);
+        ctx.fillRect(x + 2 * scale, currentY - 5 * scale, 6 * scale, 6 * scale);
+        ctx.fillStyle = '#654321';
+        ctx.fillRect(x - 6 * scale, currentY - 3 * scale, 3 * scale, 3 * scale);
+        ctx.fillRect(x + 3 * scale, currentY - 3 * scale, 3 * scale, 3 * scale);
+        
+        // Eye shine
+        ctx.fillStyle = 'white';
+        ctx.fillRect(x - 7 * scale, currentY - 4 * scale, 1 * scale, 1 * scale);
+        ctx.fillRect(x + 2 * scale, currentY - 4 * scale, 1 * scale, 1 * scale);
+
+        // Big smile
+        ctx.strokeStyle = '#654321';
+        ctx.lineWidth = 2 * scale;
+        ctx.beginPath();
+        ctx.arc(x, currentY + 5 * scale, 8 * scale, 0, Math.PI);
+        ctx.stroke();
+      }
+
+      // Body with gradient (bright blue shirt like in photo)
+      const bodyGradient = ctx.createLinearGradient(x - 25 * scale, currentY + 20 * scale, x + 25 * scale, currentY + 80 * scale);
+      bodyGradient.addColorStop(0, '#00BFFF');
+      bodyGradient.addColorStop(1, '#0099CC');
+      ctx.fillStyle = bodyGradient;
+      ctx.fillRect(x - 25 * scale, currentY + 20 * scale, 50 * scale, 60 * scale);
+
+      // Arms
+      ctx.fillRect(x - 35 * scale, currentY + 25 * scale, 10 * scale, 40 * scale);
+      ctx.fillRect(x + 25 * scale, currentY + 25 * scale, 10 * scale, 40 * scale);
+
+      // Add backpack straps (like in the photo)
+      ctx.fillStyle = '#333';
+      ctx.fillRect(x - 15 * scale, currentY + 30 * scale, 5 * scale, 30 * scale);
+      ctx.fillRect(x + 10 * scale, currentY + 30 * scale, 5 * scale, 30 * scale);
+    }
+
     function drawMemberAvatar(x: number, y: number, color: string, animated = false) {
       const bobOffset = animated ? Math.sin(frameCount * 0.15) * 2 : 0;
       const currentY = y + bobOffset;
@@ -354,7 +463,7 @@ const Index = () => {
       titleFloat += 0.02;
       menuPulse += 0.05;
       
-      const titleY = 150 + Math.sin(titleFloat) * 5;
+      const titleY = 120 + Math.sin(titleFloat) * 5;
       const pulseScale = 1 + Math.sin(menuPulse) * 0.05;
 
       // Title with glow effect
@@ -364,11 +473,15 @@ const Index = () => {
       drawText('LIFETIME LEGENDS', canvas.width / 2, titleY, 48 * pulseScale, '#ff6b35', 'center', true);
       ctx.restore();
       
-      drawText('Collierville Quest', canvas.width / 2, 200, 32, 'white', 'center', true);
-      drawText('Starring Xavier Payne', canvas.width / 2, 250, 20, '#ccc', 'center', true);
+      drawText('Collierville Quest', canvas.width / 2, 170, 32, 'white', 'center', true);
+      drawText('Starring Xavier & Morty', canvas.width / 2, 210, 20, '#ccc', 'center', true);
 
-      // Draw Xavier with animation
-      drawXavier(canvas.width / 2, 320, 1.5, true);
+      // Draw both characters with animation
+      drawXavier(canvas.width / 2 - 80, 290, 1.2, true);
+      drawText('Xavier', canvas.width / 2 - 80, 360, 16, 'white', 'center', true);
+      
+      drawMorty(canvas.width / 2 + 80, 290, 1.2, true);
+      drawText('Morty', canvas.width / 2 + 80, 360, 16, 'white', 'center', true);
 
       // Enhanced buttons with hover effects
       const startHovered = isButtonHovered(300, 400, 200, 60);
@@ -450,12 +563,14 @@ const Index = () => {
 
       drawText('SELECT A CHALLENGE', canvas.width / 2, 80, 36, '#ff6b35', 'center', true);
 
-      // Draw Xavier on the map with trail particles
-      drawXavier(canvas.width / 2, 130, 1, true);
+      // Draw both characters on the map with trail particles
+      drawXavier(canvas.width / 2 - 60, 130, 1, true);
+      drawMorty(canvas.width / 2 + 60, 130, 1, true);
       
-      // Add trail particles to Xavier
+      // Add trail particles to both characters
       if (frameCount % 30 === 0) {
-        createParticle(canvas.width / 2 + (Math.random() - 0.5) * 20, 180, '#FFD700', 'trail');
+        createParticle(canvas.width / 2 - 60 + (Math.random() - 0.5) * 20, 180, '#FFD700', 'trail');
+        createParticle(canvas.width / 2 + 60 + (Math.random() - 0.5) * 20, 180, '#00BFFF', 'trail');
       }
 
       // Draw mini-game buttons with enhanced effects
@@ -623,9 +738,12 @@ const Index = () => {
       drawText(`Timer: ${frontDeskData.timer}s`, 100, 100, 24, timerColor, 'left', true);
       drawText(`Matches: ${frontDeskData.matches}/10`, canvas.width - 150, 100, 24, 'white', 'right', true);
 
-      // Draw Xavier at desk with animation
-      drawXavier(100, 250, 1.2, true);
-      drawText('Xavier', 100, 320, 16, 'white', 'center', true);
+      // Draw Xavier and Morty at desk with animation
+      drawXavier(80, 250, 1, true);
+      drawText('Xavier', 80, 320, 16, 'white', 'center', true);
+      
+      drawMorty(160, 250, 1, true);
+      drawText('Morty', 160, 320, 16, 'white', 'center', true);
 
       // Draw member with glow effect
       if (frontDeskData.currentMember) {
@@ -722,14 +840,17 @@ const Index = () => {
       drawText(`Timer: ${workoutData.timer}s`, 100, 100, 24, 'white', 'left', true);
       drawText(`Reps: ${workoutData.reps}/15`, canvas.width - 150, 100, 24, 'white', 'right', true);
 
-      // Draw Xavier working out with enhanced animation
+      // Draw both characters working out with enhanced animation
       const offset = Math.sin(workoutData.progress * 0.1) * 15;
       const sweatOffset = Math.sin(frameCount * 0.3) * 2;
-      drawXavier(canvas.width / 2, 230 + offset, 1.5, true);
       
-      // Sweat particles
+      drawXavier(canvas.width / 2 - 60, 230 + offset, 1.2, true);
+      drawMorty(canvas.width / 2 + 60, 230 + offset, 1.2, true);
+      
+      // Sweat particles for both characters
       if (workoutData.progress > 50 && frameCount % 10 === 0) {
-        createParticle(canvas.width / 2 + sweatOffset, 200 + offset, '#87CEEB', 'trail');
+        createParticle(canvas.width / 2 - 60 + sweatOffset, 200 + offset, '#87CEEB', 'trail');
+        createParticle(canvas.width / 2 + 60 + sweatOffset, 200 + offset, '#87CEEB', 'trail');
       }
 
       // Enhanced weights with metallic effect
@@ -845,9 +966,12 @@ const Index = () => {
       drawText('SMOOTHIE RUSH', canvas.width / 2, 50, 32, '#ff6b35', 'center', true);
       drawText(`Smoothies: ${smoothieData.smoothies}/5`, canvas.width / 2, 100, 24, 'white', 'center', true);
 
-      // Draw Xavier making smoothies
-      drawXavier(100, 300, 1, true);
-      drawText('Xavier', 100, 370, 16, 'white', 'center', true);
+      // Draw both characters making smoothies
+      drawXavier(80, 300, 1, true);
+      drawText('Xavier', 80, 370, 16, 'white', 'center', true);
+      
+      drawMorty(180, 300, 1, true);
+      drawText('Morty', 180, 370, 16, 'white', 'center', true);
 
       // Enhanced recipe display
       ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
@@ -981,18 +1105,24 @@ const Index = () => {
       drawText('CONGRATULATIONS!', canvas.width / 2, 150 + victoryFloat, 48, '#4CAF50', 'center', true);
       ctx.restore();
       
-      drawText('Xavier has completed all challenges!', canvas.width / 2, 220, 24, 'white', 'center', true);
+      drawText('Xavier and Morty have completed all challenges!', canvas.width / 2, 220, 24, 'white', 'center', true);
 
-      // Draw Xavier celebrating with enhanced animation
-      const celebrateScale = 2 + Math.sin(frameCount * 0.1) * 0.2;
-      drawXavier(canvas.width / 2, 280, celebrateScale, true);
+      // Draw both characters celebrating with enhanced animation
+      const celebrateScale = 1.8 + Math.sin(frameCount * 0.1) * 0.2;
+      drawXavier(canvas.width / 2 - 80, 280, celebrateScale, true);
+      drawMorty(canvas.width / 2 + 80, 280, celebrateScale, true);
 
-      // Fireworks effect around Xavier
+      // Fireworks effect around both characters
       if (frameCount % 15 === 0) {
         const colors = ['#FFD700', '#ff6b35', '#4CAF50', '#2196F3', '#9C27B0'];
         for (let i = 0; i < 5; i++) {
           createParticle(
-            canvas.width / 2 + (Math.random() - 0.5) * 200,
+            canvas.width / 2 - 80 + (Math.random() - 0.5) * 150,
+            300 + (Math.random() - 0.5) * 100,
+            colors[Math.floor(Math.random() * colors.length)]
+          );
+          createParticle(
+            canvas.width / 2 + 80 + (Math.random() - 0.5) * 150,
             300 + (Math.random() - 0.5) * 100,
             colors[Math.floor(Math.random() * colors.length)]
           );
