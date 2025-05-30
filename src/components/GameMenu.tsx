@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { GameState, GAME_STATES } from '../types/gameTypes';
 import { drawText, drawGradientButton, isButtonClicked, isButtonHovered } from '../utils/uiHelpers';
@@ -173,7 +174,7 @@ export const GameMenu: React.FC<GameMenuProps> = ({
 
   // Handle character clicks
   if (clicked && (xavierHovered || mortyHovered || mikeHovered || carsonHovered || avaHovered)) {
-    const clickX = xavierHovered ? xavierX : mortyHovered ? mortyX : mikeHovered ? mikeX : carsonHovered ? carsonX : avaHovered ? avaX;
+    const clickX = xavierHovered ? xavierX : mortyHovered ? mortyX : mikeHovered ? mikeX : carsonHovered ? carsonX : avaX;
     const clickY = characterY;
     const clickColor = xavierHovered ? '#FFD700' : mortyHovered ? '#00BFFF' : mikeHovered ? '#8B4513' : carsonHovered ? '#4169E1' : '#D2691E';
     
