@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { GameRenderer } from './components/GameRenderer';
 import { useGameStateManager } from './hooks/useGameStateManager';
@@ -7,7 +6,7 @@ import { useCanvasInteraction } from './hooks/useCanvasInteraction';
 
 const App: React.FC = () => {
   const { gameState, setGameState, gameData, setGameData, initMiniGame } = useGameStateManager();
-  const { xavierImage, xavierImageLoaded, mortyImage, mortyImageLoaded, mikeImage, mikeImageLoaded, carsonImage, carsonImageLoaded } = useImageLoader();
+  const { xavierImage, xavierImageLoaded, mortyImage, mortyImageLoaded, mikeImage, mikeImageLoaded, carsonImage, carsonImageLoaded, avaImage, avaImageLoaded } = useImageLoader();
   const {
     canvas,
     setCanvas,
@@ -49,6 +48,8 @@ const App: React.FC = () => {
           mikeImageLoaded,
           carsonImage,
           carsonImageLoaded,
+          avaImage,
+          avaImageLoaded,
           onStateChange: setGameState,
           onUpdateGameData: setGameData,
           onInitMiniGame: (state) => initMiniGame(state, canvas)
@@ -61,7 +62,7 @@ const App: React.FC = () => {
 
       render();
     }
-  }, [ctx, canvas, gameState, mouseX, mouseY, clicked, backgroundStars, gameData, xavierImage, xavierImageLoaded, mortyImage, mortyImageLoaded, mikeImage, mikeImageLoaded, carsonImage, carsonImageLoaded, keys]);
+  }, [ctx, canvas, gameState, mouseX, mouseY, clicked, backgroundStars, gameData, xavierImage, xavierImageLoaded, mortyImage, mortyImageLoaded, mikeImage, mikeImageLoaded, carsonImage, carsonImageLoaded, avaImage, avaImageLoaded, keys]);
 
   const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const nativeEvent = e.nativeEvent;

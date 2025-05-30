@@ -469,6 +469,154 @@ export function drawCarson(
   ctx.stroke();
 }
 
+export function drawAva(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  scale = 1,
+  animated = false,
+  frameCount: number,
+  avaImage?: HTMLImageElement,
+  avaImageLoaded?: boolean
+) {
+  const bobOffset = animated ? Math.sin(frameCount * 0.14) * 3 : 0;
+  const currentY = y + bobOffset;
+  
+  // Shadow
+  ctx.save();
+  ctx.globalAlpha = 0.3;
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.ellipse(x, y + 100 * scale, 30 * scale, 8 * scale, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  if (avaImageLoaded && avaImage) {
+    // Draw Ava's real photo as a circular avatar
+    ctx.save();
+    
+    // Create circular clipping path
+    ctx.beginPath();
+    ctx.arc(x, currentY - 10 * scale, 35 * scale, 0, Math.PI * 2);
+    ctx.clip();
+    
+    // Draw the image scaled and centered
+    const imgSize = 70 * scale;
+    ctx.drawImage(avaImage, x - imgSize/2, currentY - 45 * scale, imgSize, imgSize);
+    
+    ctx.restore();
+    
+    // Add a cafe-themed border around Ava's photo (warm brown like coffee)
+    ctx.strokeStyle = '#D2691E';
+    ctx.lineWidth = 3 * scale;
+    ctx.beginPath();
+    ctx.arc(x, currentY - 10 * scale, 35 * scale, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    // Add glow effect
+    ctx.save();
+    ctx.shadowColor = '#D2691E';
+    ctx.shadowBlur = 10 * scale;
+    ctx.strokeStyle = '#D2691E';
+    ctx.lineWidth = 2 * scale;
+    ctx.beginPath();
+    ctx.arc(x, currentY - 10 * scale, 35 * scale, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  } else {
+    // Fallback pixel art for Ava
+    // Head
+    ctx.fillStyle = '#FDBCB4';
+    ctx.beginPath();
+    ctx.arc(x, currentY, 20 * scale, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Hair (brown)
+    const hairGradient = ctx.createRadialGradient(x, currentY - 10 * scale, 0, x, currentY - 10 * scale, 20 * scale);
+    hairGradient.addColorStop(0, '#8B4513');
+    hairGradient.addColorStop(1, '#654321');
+    ctx.fillStyle = hairGradient;
+    ctx.beginPath();
+    ctx.arc(x, currentY - 10 * scale, 20 * scale, Math.PI, 0);
+    ctx.fill();
+
+    // Brown eyes
+    ctx.fillStyle = 'white';
+    ctx.fillRect(x - 8 * scale, currentY - 5 * scale, 6 * scale, 6 * scale);
+    ctx.fillRect(x + 2 * scale, currentY - 5 * scale, 6 * scale, 6 * scale);
+    ctx.fillStyle = '#8B4513';
+    ctx.fillRect(x - 6 * scale, currentY - 3 * scale, 3 * scale, 3 * scale);
+    ctx.fillRect(x + 3 * scale, currentY - 3 * scale, 3 * scale, 3 * scale);
+    
+    // Eye shine
+    ctx.fillStyle = 'white';
+    ctx.fillRect(x - 7 * scale, currentY - 4 * scale, 1 * scale, 1 * scale);
+    ctx.fillRect(x + 2 * scale, currentY - 4 * scale, 1 * scale, 1 * scale);
+
+    // Friendly smile
+    ctx.strokeStyle = '#8B4513';
+    ctx.lineWidth = 2 * scale;
+    ctx.beginPath();
+    ctx.arc(x, currentY + 5 * scale, 8 * scale, 0, Math.PI);
+    ctx.stroke();
+
+    // Sexy big glasses (stylish brown frames)
+    ctx.strokeStyle = '#654321';
+    ctx.lineWidth = 3 * scale;
+    ctx.beginPath();
+    // Left lens
+    ctx.arc(x - 10 * scale, currentY - 2 * scale, 12 * scale, 0, Math.PI * 2);
+    // Right lens
+    ctx.arc(x + 10 * scale, currentY - 2 * scale, 12 * scale, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    // Glasses bridge
+    ctx.beginPath();
+    ctx.moveTo(x - 2 * scale, currentY - 2 * scale);
+    ctx.lineTo(x + 2 * scale, currentY - 2 * scale);
+    ctx.stroke();
+    
+    // Glasses arms
+    ctx.beginPath();
+    ctx.moveTo(x - 22 * scale, currentY - 2 * scale);
+    ctx.lineTo(x - 30 * scale, currentY + 5 * scale);
+    ctx.moveTo(x + 22 * scale, currentY - 2 * scale);
+    ctx.lineTo(x + 30 * scale, currentY + 5 * scale);
+    ctx.stroke();
+  }
+
+  // Body with gradient (cafe uniform - warm brown)
+  const bodyGradient = ctx.createLinearGradient(x - 25 * scale, currentY + 20 * scale, x + 25 * scale, currentY + 80 * scale);
+  bodyGradient.addColorStop(0, '#D2691E');
+  bodyGradient.addColorStop(1, '#B8860B');
+  ctx.fillStyle = bodyGradient;
+  ctx.fillRect(x - 25 * scale, currentY + 20 * scale, 50 * scale, 60 * scale);
+
+  // Arms
+  ctx.fillRect(x - 35 * scale, currentY + 25 * scale, 10 * scale, 40 * scale);
+  ctx.fillRect(x + 25 * scale, currentY + 25 * scale, 10 * scale, 40 * scale);
+
+  // Add cafe apron detail
+  ctx.fillStyle = '#F5DEB3';
+  ctx.fillRect(x - 20 * scale, currentY + 35 * scale, 40 * scale, 30 * scale);
+  
+  // Apron strings
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(x - 2 * scale, currentY + 30 * scale, 4 * scale, 10 * scale);
+  
+  // Coffee cup in hand (cafe worker detail)
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(x + 30 * scale, currentY + 45 * scale, 8 * scale, 10 * scale);
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(x + 31 * scale, currentY + 47 * scale, 6 * scale, 6 * scale);
+  // Cup handle
+  ctx.strokeStyle = '#FFFFFF';
+  ctx.lineWidth = 2 * scale;
+  ctx.beginPath();
+  ctx.arc(x + 38 * scale, currentY + 50 * scale, 3 * scale, -Math.PI/2, Math.PI/2);
+  ctx.stroke();
+}
+
 export function drawMemberAvatar(
   ctx: CanvasRenderingContext2D,
   x: number,

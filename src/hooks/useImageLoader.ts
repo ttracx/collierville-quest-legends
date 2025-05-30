@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 
 export const useImageLoader = () => {
@@ -10,6 +9,8 @@ export const useImageLoader = () => {
   const [mikeImageLoaded, setMikeImageLoaded] = useState(false);
   const [carsonImage, setCarsonImage] = useState<HTMLImageElement>();
   const [carsonImageLoaded, setCarsonImageLoaded] = useState(false);
+  const [avaImage, setAvaImage] = useState<HTMLImageElement>();
+  const [avaImageLoaded, setAvaImageLoaded] = useState(false);
 
   useEffect(() => {
     // Load Xavier's image
@@ -63,6 +64,19 @@ export const useImageLoader = () => {
       setCarsonImageLoaded(false);
     };
     setCarsonImage(carsonImg);
+
+    // Load Ava's image (placeholder for now)
+    const avaImg = new Image();
+    avaImg.src = '/lovable-uploads/8131f420-fab4-4256-83b6-5f8339d387f4.png'; // Using Xavier's image as placeholder
+    avaImg.onload = () => {
+      console.log('Ava image loaded successfully');
+      setAvaImageLoaded(true);
+    };
+    avaImg.onerror = (error) => {
+      console.error('Failed to load Ava image:', error);
+      setAvaImageLoaded(false);
+    };
+    setAvaImage(avaImg);
   }, []);
 
   return {
@@ -73,6 +87,8 @@ export const useImageLoader = () => {
     mikeImage,
     mikeImageLoaded,
     carsonImage,
-    carsonImageLoaded
+    carsonImageLoaded,
+    avaImage,
+    avaImageLoaded
   };
 };
