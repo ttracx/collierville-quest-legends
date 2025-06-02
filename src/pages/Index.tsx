@@ -8,9 +8,14 @@ import { generateMember, generateBadges, generateRecipe, generateIngredients } f
 import { FrontDesk } from '../components/FrontDesk';
 import { Workout } from '../components/Workout';
 import { Smoothie } from '../components/Smoothie';
+import { Basketball } from '../components/Basketball';
+import { Swimming } from '../components/Swimming';
+import { Yoga } from '../components/Yoga';
+import { Cardio } from '../components/Cardio';
 import { Victory } from '../components/Victory';
 import { soundSystem } from '../utils/soundSystem';
 import { useIsMobile } from '../hooks/use-mobile';
+import { generateAvatarDataURL } from '../utils/generateAvatars';
 
 const Index = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -83,6 +88,33 @@ const Index = () => {
     
     mortyImage.onload = () => {
       mortyImageLoaded = true;
+    };
+
+    // Load Mike's image
+    const mikeImage = new Image();
+    mikeImage.src = generateAvatarDataURL('mike');
+    let mikeImageLoaded = false;
+    
+    mikeImage.onload = () => {
+      mikeImageLoaded = true;
+    };
+
+    // Load Carson's image
+    const carsonImage = new Image();
+    carsonImage.src = generateAvatarDataURL('carson');
+    let carsonImageLoaded = false;
+    
+    carsonImage.onload = () => {
+      carsonImageLoaded = true;
+    };
+
+    // Load Ava's image
+    const avaImage = new Image();
+    avaImage.src = generateAvatarDataURL('ava');
+    let avaImageLoaded = false;
+    
+    avaImage.onload = () => {
+      avaImageLoaded = true;
     };
 
     let gameState: GameState = GAME_STATES.MENU;
@@ -331,6 +363,12 @@ const Index = () => {
             xavierImageLoaded,
             mortyImage,
             mortyImageLoaded,
+            mikeImage,
+            mikeImageLoaded,
+            carsonImage,
+            carsonImageLoaded,
+            avaImage,
+            avaImageLoaded,
             onStateChange: handleStateChange
           });
           break;
@@ -359,6 +397,12 @@ const Index = () => {
             xavierImageLoaded,
             mortyImage,
             mortyImageLoaded,
+            mikeImage,
+            mikeImageLoaded,
+            carsonImage,
+            carsonImageLoaded,
+            avaImage,
+            avaImageLoaded,
             onStateChange: handleStateChange,
             onInitMiniGame: initMiniGame
           });
@@ -407,6 +451,66 @@ const Index = () => {
             onUpdateGameData: (newGameData) => { gameData = newGameData; }
           });
           break;
+        case GAME_STATES.BASKETBALL:
+          Basketball({
+            ctx,
+            canvas,
+            mouseX,
+            mouseY,
+            clicked,
+            frameCount,
+            gameData: gameData,
+            keys: keys,
+            particles: particles,
+            onStateChange: handleStateChange,
+            onUpdateGameData: (newGameData) => { gameData = newGameData; }
+          });
+          break;
+        case GAME_STATES.SWIMMING:
+          Swimming({
+            ctx,
+            canvas,
+            mouseX,
+            mouseY,
+            clicked,
+            frameCount,
+            gameData: gameData,
+            keys: keys,
+            particles: particles,
+            onStateChange: handleStateChange,
+            onUpdateGameData: (newGameData) => { gameData = newGameData; }
+          });
+          break;
+        case GAME_STATES.YOGA:
+          Yoga({
+            ctx,
+            canvas,
+            mouseX,
+            mouseY,
+            clicked,
+            frameCount,
+            gameData: gameData,
+            keys: keys,
+            particles: particles,
+            onStateChange: handleStateChange,
+            onUpdateGameData: (newGameData) => { gameData = newGameData; }
+          });
+          break;
+        case GAME_STATES.CARDIO:
+          Cardio({
+            ctx,
+            canvas,
+            mouseX,
+            mouseY,
+            clicked,
+            frameCount,
+            gameData: gameData,
+            keys: keys,
+            particles: particles,
+            onStateChange: handleStateChange,
+            onUpdateGameData: (newGameData) => { gameData = newGameData; }
+          });
+          break;
         case GAME_STATES.VICTORY:
           Victory({
             ctx,
@@ -421,6 +525,12 @@ const Index = () => {
             xavierImageLoaded: xavierImageLoaded,
             mortyImage: mortyImage,
             mortyImageLoaded: mortyImageLoaded,
+            mikeImage: mikeImage,
+            mikeImageLoaded: mikeImageLoaded,
+            carsonImage: carsonImage,
+            carsonImageLoaded: carsonImageLoaded,
+            avaImage: avaImage,
+            avaImageLoaded: avaImageLoaded,
             onStateChange: handleStateChange,
             completedGames: gameData.completedGames
           });
