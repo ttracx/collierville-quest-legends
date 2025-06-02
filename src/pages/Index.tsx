@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { GameState, GAME_STATES, GameData } from '../types/gameTypes';
 import { Particle, createParticle, updateParticles, drawParticles } from '../utils/particleSystem';
 import { GameMenu } from '../components/GameMenu';
@@ -13,6 +14,8 @@ import { Swimming } from '../components/Swimming';
 import { Yoga } from '../components/Yoga';
 import { Cardio } from '../components/Cardio';
 import { Victory } from '../components/Victory';
+import { Leaderboard } from '../components/Leaderboard';
+import { SaveLoadGame } from '../components/SaveLoadGame';
 import { soundSystem } from '../utils/soundSystem';
 import { useIsMobile } from '../hooks/use-mobile';
 import { generateAvatarDataURL } from '../utils/generateAvatars';
@@ -20,6 +23,10 @@ import { generateAvatarDataURL } from '../utils/generateAvatars';
 const Index = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showSaveLoad, setShowSaveLoad] = useState(false);
+  const [currentGameState, setCurrentGameState] = useState<GameState>(GAME_STATES.MENU);
+  const [currentGameData, setCurrentGameData] = useState<GameData | null>(null);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -535,6 +542,60 @@ const Index = () => {
             completedGames: gameData.completedGames
           });
           break;
+        case GAME_STATES.LEADERBOARD:
+          // Show leaderboard overlay
+          setShowLeaderboard(true);
+          setCurrentGameData(gameData);
+          // Continue showing the menu in the background
+          GameMenu({
+            ctx,
+            canvas,
+            mouseX,
+            mouseY,
+            clicked,
+            frameCount,
+            backgroundStars,
+            particles,
+            xavierImage,
+            xavierImageLoaded,
+            mortyImage,
+            mortyImageLoaded,
+            mikeImage,
+            mikeImageLoaded,
+            carsonImage,
+            carsonImageLoaded,
+            avaImage,
+            avaImageLoaded,
+            onStateChange: handleStateChange
+          });
+          break;
+        case GAME_STATES.SAVE_LOAD:
+          // Show save/load overlay
+          setShowSaveLoad(true);
+          setCurrentGameData(gameData);
+          // Continue showing the menu in the background
+          GameMenu({
+            ctx,
+            canvas,
+            mouseX,
+            mouseY,
+            clicked,
+            frameCount,
+            backgroundStars,
+            particles,
+            xavierImage,
+            xavierImageLoaded,
+            mortyImage,
+            mortyImageLoaded,
+            mikeImage,
+            mikeImageLoaded,
+            carsonImage,
+            carsonImageLoaded,
+            avaImage,
+            avaImageLoaded,
+            onStateChange: handleStateChange
+          });
+          break;
       }
 
       // Draw particles on top
@@ -569,6 +630,18 @@ const Index = () => {
   const toggleSound = () => {
     const enabled = soundSystem.toggle();
     setSoundEnabled(enabled);
+  };
+
+  const handleLoadGame = (loadedState: any, loadedScores: any) => {
+    if (currentGameData) {
+      // Update the game data with loaded scores
+      setCurrentGameData({
+        ...currentGameData,
+        ...loadedScores
+      });
+    }
+    setShowSaveLoad(false);
+    setCurrentGameState(GAME_STATES.MAP);
   };
 
   return (
@@ -615,6 +688,48 @@ const Index = () => {
           </a>
         </p>
       </div>
+
+      {/* Leaderboard overlay */}
+      {showLeaderboard && createPortal(
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <Leaderboard
+              currentScore={currentGameData?.totalScore}
+              onClose={() => {
+                setShowLeaderboard(false);
+                setCurrentGameState(GAME_STATES.MENU);
+              }}
+            />
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Save/Load overlay */}
+      {showSaveLoad && createPortal(
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="max-w-md w-full">
+            <SaveLoadGame
+              gameState={currentGameState}
+              scores={{
+                basketball: currentGameData?.basketballScore || 0,
+                swimming: currentGameData?.swimmingScore || 0,
+                yoga: currentGameData?.yogaScore || 0,
+                cardio: currentGameData?.cardioScore || 0,
+                frontDesk: currentGameData?.frontDeskScore || 0,
+                workout: currentGameData?.workoutScore || 0,
+                smoothie: currentGameData?.smoothieScore || 0
+              }}
+              onLoadGame={handleLoadGame}
+              onClose={() => {
+                setShowSaveLoad(false);
+                setCurrentGameState(GAME_STATES.MENU);
+              }}
+            />
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

@@ -190,15 +190,20 @@ export const GameMenu: React.FC<GameMenuProps> = ({
   }
 
   // Enhanced buttons with hover effects
-  const startHovered = isButtonHovered(300, 400, 200, 60, mouseX, mouseY, canvas);
-  const instructionsHovered = isButtonHovered(300, 480, 200, 60, mouseX, mouseY, canvas);
+  const buttonX = canvas.width / 2 - 100;
+  const startHovered = isButtonHovered(buttonX, 400, 200, 50, mouseX, mouseY, canvas);
+  const instructionsHovered = isButtonHovered(buttonX, 460, 200, 50, mouseX, mouseY, canvas);
+  const leaderboardHovered = isButtonHovered(buttonX, 520, 200, 50, mouseX, mouseY, canvas);
+  const saveLoadHovered = isButtonHovered(buttonX, 580, 200, 50, mouseX, mouseY, canvas);
   
-  drawGradientButton(ctx, 300, 400, 200, 60, 'START GAME', '#ff6b35', '#ff4500', startHovered);
-  drawGradientButton(ctx, 300, 480, 200, 60, 'INSTRUCTIONS', '#2196F3', '#1976D2', instructionsHovered);
+  drawGradientButton(ctx, buttonX, 400, 200, 50, 'START GAME', '#ff6b35', '#ff4500', startHovered);
+  drawGradientButton(ctx, buttonX, 460, 200, 50, 'INSTRUCTIONS', '#2196F3', '#1976D2', instructionsHovered);
+  drawGradientButton(ctx, buttonX, 520, 200, 50, 'LEADERBOARD', '#9c27b0', '#7b1fa2', leaderboardHovered);
+  drawGradientButton(ctx, buttonX, 580, 200, 50, 'SAVE/LOAD', '#4caf50', '#388e3c', saveLoadHovered);
 
-  if (isButtonClicked(300, 400, 200, 60, mouseX, mouseY, clicked, canvas)) {
-    createParticle(400, 430, '#ff6b35', 'burst', particles);
-    createParticle(400, 430, '#FFD700', 'burst', particles);
+  if (isButtonClicked(buttonX, 400, 200, 50, mouseX, mouseY, clicked, canvas)) {
+    createParticle(canvas.width / 2, 425, '#ff6b35', 'burst', particles);
+    createParticle(canvas.width / 2, 425, '#FFD700', 'burst', particles);
     
     // Generate lore when starting game
     if (!loreManager.isLoaded()) {
@@ -207,9 +212,17 @@ export const GameMenu: React.FC<GameMenuProps> = ({
     
     onStateChange(GAME_STATES.MAP);
   }
-  if (isButtonClicked(300, 480, 200, 60, mouseX, mouseY, clicked, canvas)) {
-    createParticle(400, 510, '#2196F3', 'burst', particles);
+  if (isButtonClicked(buttonX, 460, 200, 50, mouseX, mouseY, clicked, canvas)) {
+    createParticle(canvas.width / 2, 485, '#2196F3', 'burst', particles);
     onStateChange(GAME_STATES.INSTRUCTIONS);
+  }
+  if (isButtonClicked(buttonX, 520, 200, 50, mouseX, mouseY, clicked, canvas)) {
+    createParticle(canvas.width / 2, 545, '#9c27b0', 'burst', particles);
+    onStateChange(GAME_STATES.LEADERBOARD);
+  }
+  if (isButtonClicked(buttonX, 580, 200, 50, mouseX, mouseY, clicked, canvas)) {
+    createParticle(canvas.width / 2, 605, '#4caf50', 'burst', particles);
+    onStateChange(GAME_STATES.SAVE_LOAD);
   }
 
   drawText(ctx, 'Click characters or buttons to play', canvas.width / 2, 650, 16, '#888');

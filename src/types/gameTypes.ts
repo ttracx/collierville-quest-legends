@@ -10,7 +10,9 @@ export const GAME_STATES = {
   SWIMMING: 'swimming',
   YOGA: 'yoga',
   CARDIO: 'cardio',
-  VICTORY: 'victory'
+  VICTORY: 'victory',
+  LEADERBOARD: 'leaderboard',
+  SAVE_LOAD: 'save_load'
 } as const;
 
 export type GameState = typeof GAME_STATES[keyof typeof GAME_STATES];
