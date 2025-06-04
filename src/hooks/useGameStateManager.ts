@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { GameState, GAME_STATES, GameData } from '../types/gameTypes';
 
@@ -67,6 +66,13 @@ export const useGameStateManager = () => {
     },
     totalScore: 0,
     completedGames: new Set(),
+    basketballScore: 0,
+    swimmingScore: 0,
+    yogaScore: 0,
+    cardioScore: 0,
+    frontDeskScore: 0,
+    workoutScore: 0,
+    smoothieScore: 0,
   });
 
   const initMiniGame = (state: GameState, canvas: HTMLCanvasElement) => {
