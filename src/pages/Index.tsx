@@ -21,6 +21,8 @@ import { useIsMobile } from '../hooks/use-mobile';
 import { generateAvatarDataURL } from '../utils/generateAvatars';
 
 const Index = () => {
+  console.log('Index component mounting...');
+  
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
@@ -29,12 +31,25 @@ const Index = () => {
   const [currentGameData, setCurrentGameData] = useState<GameData | null>(null);
   const isMobile = useIsMobile();
 
+  console.log('Initial game state:', currentGameState);
+  console.log('Is mobile:', isMobile);
+
   useEffect(() => {
+    console.log('Main useEffect starting...');
+    
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      console.error('Canvas ref is null!');
+      return;
+    }
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      console.error('Canvas context is null!');
+      return;
+    }
+
+    console.log('Canvas and context initialized successfully');
 
     const updateCanvasSize = () => {
       const viewportWidth = window.innerWidth;
@@ -71,14 +86,20 @@ const Index = () => {
       window.visualViewport.addEventListener('resize', handleVisualViewportChange);
     }
 
+    console.log('Sound system initializing...');
     soundSystem.init();
 
+    console.log('Loading character images...');
     const xavierImage = new Image();
     xavierImage.src = '/lovable-uploads/8131f420-fab4-4256-83b6-5f8339d387f4.png';
     let xavierImageLoaded = false;
     
     xavierImage.onload = () => {
+      console.log('Xavier image loaded');
       xavierImageLoaded = true;
+    };
+    xavierImage.onerror = (error) => {
+      console.error('Xavier image failed to load:', error);
     };
 
     const mortyImage = new Image();
@@ -86,7 +107,11 @@ const Index = () => {
     let mortyImageLoaded = false;
     
     mortyImage.onload = () => {
+      console.log('Morty image loaded');
       mortyImageLoaded = true;
+    };
+    mortyImage.onerror = (error) => {
+      console.error('Morty image failed to load:', error);
     };
 
     const mikeImage = new Image();
@@ -94,7 +119,11 @@ const Index = () => {
     let mikeImageLoaded = false;
     
     mikeImage.onload = () => {
+      console.log('Mike image loaded');
       mikeImageLoaded = true;
+    };
+    mikeImage.onerror = (error) => {
+      console.error('Mike image failed to load:', error);
     };
 
     const carsonImage = new Image();
@@ -102,7 +131,11 @@ const Index = () => {
     let carsonImageLoaded = false;
     
     carsonImage.onload = () => {
+      console.log('Carson image loaded');
       carsonImageLoaded = true;
+    };
+    carsonImage.onerror = (error) => {
+      console.error('Carson image failed to load:', error);
     };
 
     const avaImage = new Image();
@@ -110,10 +143,17 @@ const Index = () => {
     let avaImageLoaded = false;
     
     avaImage.onload = () => {
+      console.log('Ava image loaded');
       avaImageLoaded = true;
+    };
+    avaImage.onerror = (error) => {
+      console.error('Ava image failed to load:', error);
     };
 
     let gameState: GameState = GAME_STATES.MENU;
+    console.log('Game state initialized to:', gameState);
+
+    // ... keep existing code (gameData initialization)
     let gameData: GameData = {
       frontDesk: {
         timer: 30,
@@ -203,6 +243,7 @@ const Index = () => {
     const initializeStars = () => {
       backgroundStars = [];
       const starCount = getStarCount();
+      console.log('Initializing', starCount, 'stars');
       for (let i = 0; i < starCount; i++) {
         backgroundStars.push({
           x: Math.random() * canvas.width,
@@ -216,6 +257,7 @@ const Index = () => {
 
     initializeStars();
 
+    // ... keep existing code (event handler functions)
     const getEventCoordinates = (e: MouseEvent | TouchEvent) => {
       const rect = canvas.getBoundingClientRect();
       let clientX, clientY;
@@ -288,6 +330,7 @@ const Index = () => {
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
 
+    // ... keep existing code (initMiniGame and handleStateChange functions)
     function initMiniGame(state: GameState) {
       if (state === GAME_STATES.FRONTDESK) {
         const currentMember = generateMember();
@@ -318,6 +361,7 @@ const Index = () => {
     }
 
     function handleStateChange(newState: GameState) {
+      console.log('State changing from', gameState, 'to', newState);
       gameState = newState;
       
       if (newState === GAME_STATES.MENU) {
@@ -332,264 +376,283 @@ const Index = () => {
     let frameCount = 0;
 
     function gameLoop() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      try {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      particles = updateParticles(particles);
+        particles = updateParticles(particles);
 
-      const particleFrequency = isMobile ? 240 : 120;
-      if (frameCount % particleFrequency === 0) {
-        createParticle(Math.random() * canvas.width, 0, '#ffffff', 'trail', particles);
+        const particleFrequency = isMobile ? 240 : 120;
+        if (frameCount % particleFrequency === 0) {
+          createParticle(Math.random() * canvas.width, 0, '#ffffff', 'trail', particles);
+        }
+
+        if (frameCount === 0) {
+          console.log('First frame rendered, game state:', gameState);
+        }
+
+        switch (gameState) {
+          case GAME_STATES.MENU:
+            if (frameCount === 0) {
+              console.log('Rendering GameMenu component');
+            }
+            GameMenu({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
+              backgroundStars,
+              particles,
+              xavierImage,
+              xavierImageLoaded,
+              mortyImage,
+              mortyImageLoaded,
+              mikeImage,
+              mikeImageLoaded,
+              carsonImage,
+              carsonImageLoaded,
+              avaImage,
+              avaImageLoaded,
+              onStateChange: handleStateChange
+            });
+            break;
+          // ... keep existing code (all other game state cases)
+          case GAME_STATES.INSTRUCTIONS:
+            GameInstructions({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              onStateChange: handleStateChange
+            });
+            break;
+          case GAME_STATES.MAP:
+            GameMap({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
+              totalScore: gameData.totalScore,
+              completedGames: gameData.completedGames,
+              particles,
+              xavierImage,
+              xavierImageLoaded,
+              mortyImage,
+              mortyImageLoaded,
+              mikeImage,
+              mikeImageLoaded,
+              carsonImage,
+              carsonImageLoaded,
+              avaImage,
+              avaImageLoaded,
+              onStateChange: handleStateChange,
+              onInitMiniGame: initMiniGame
+            });
+            break;
+          case GAME_STATES.FRONTDESK:
+            FrontDesk({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
+              gameData: gameData,
+              keys: keys,
+              particles: particles,
+              onStateChange: handleStateChange,
+              onUpdateGameData: (newGameData) => { gameData = newGameData; }
+            });
+            break;
+          case GAME_STATES.WORKOUT:
+            Workout({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
+              gameData: gameData,
+              keys: keys,
+              particles: particles,
+              onStateChange: handleStateChange,
+              onUpdateGameData: (newGameData) => { gameData = newGameData; }
+            });
+            break;
+          case GAME_STATES.SMOOTHIE:
+            Smoothie({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
+              gameData: gameData,
+              particles: particles,
+              onStateChange: handleStateChange,
+              onUpdateGameData: (newGameData) => { gameData = newGameData; }
+            });
+            break;
+          case GAME_STATES.BASKETBALL:
+            Basketball({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
+              gameData: gameData,
+              keys: keys,
+              particles: particles,
+              onStateChange: handleStateChange,
+              onUpdateGameData: (newGameData) => { gameData = newGameData; }
+            });
+            break;
+          case GAME_STATES.SWIMMING:
+            Swimming({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
+              gameData: gameData,
+              keys: keys,
+              particles: particles,
+              onStateChange: handleStateChange,
+              onUpdateGameData: (newGameData) => { gameData = newGameData; }
+            });
+            break;
+          case GAME_STATES.YOGA:
+            Yoga({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
+              gameData: gameData,
+              keys: keys,
+              particles: particles,
+              onStateChange: handleStateChange,
+              onUpdateGameData: (newGameData) => { gameData = newGameData; }
+            });
+            break;
+          case GAME_STATES.CARDIO:
+            Cardio({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
+              gameData: gameData,
+              keys: keys,
+              particles: particles,
+              onStateChange: handleStateChange,
+              onUpdateGameData: (newGameData) => { gameData = newGameData; }
+            });
+            break;
+          case GAME_STATES.VICTORY:
+            Victory({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
+              totalScore: gameData.totalScore,
+              particles: particles,
+              xavierImage: xavierImage,
+              xavierImageLoaded: xavierImageLoaded,
+              mortyImage: mortyImage,
+              mortyImageLoaded: mortyImageLoaded,
+              mikeImage: mikeImage,
+              mikeImageLoaded: mikeImageLoaded,
+              carsonImage: carsonImage,
+              carsonImageLoaded: carsonImageLoaded,
+              avaImage: avaImage,
+              avaImageLoaded: avaImageLoaded,
+              onStateChange: handleStateChange,
+              completedGames: gameData.completedGames
+            });
+            break;
+          case GAME_STATES.LEADERBOARD:
+            setShowLeaderboard(true);
+            setCurrentGameData(gameData);
+            GameMenu({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
+              backgroundStars,
+              particles,
+              xavierImage,
+              xavierImageLoaded,
+              mortyImage,
+              mortyImageLoaded,
+              mikeImage,
+              mikeImageLoaded,
+              carsonImage,
+              carsonImageLoaded,
+              avaImage,
+              avaImageLoaded,
+              onStateChange: handleStateChange
+            });
+            break;
+          case GAME_STATES.SAVE_LOAD:
+            setShowSaveLoad(true);
+            setCurrentGameData(gameData);
+            GameMenu({
+              ctx,
+              canvas,
+              mouseX,
+              mouseY,
+              clicked,
+              frameCount,
+              backgroundStars,
+              particles,
+              xavierImage,
+              xavierImageLoaded,
+              mortyImage,
+              mortyImageLoaded,
+              mikeImage,
+              mikeImageLoaded,
+              carsonImage,
+              carsonImageLoaded,
+              avaImage,
+              avaImageLoaded,
+              onStateChange: handleStateChange
+            });
+            break;
+        }
+
+        drawParticles(ctx, particles);
+
+        clicked = false;
+        frameCount++;
+        
+        if (frameCount === 1) {
+          console.log('Game loop running successfully, frame count:', frameCount);
+        }
+        
+        requestAnimationFrame(gameLoop);
+      } catch (error) {
+        console.error('Error in game loop:', error);
       }
-
-      switch (gameState) {
-        case GAME_STATES.MENU:
-          GameMenu({
-            ctx,
-            canvas,
-            mouseX,
-            mouseY,
-            clicked,
-            frameCount,
-            backgroundStars,
-            particles,
-            xavierImage,
-            xavierImageLoaded,
-            mortyImage,
-            mortyImageLoaded,
-            mikeImage,
-            mikeImageLoaded,
-            carsonImage,
-            carsonImageLoaded,
-            avaImage,
-            avaImageLoaded,
-            onStateChange: handleStateChange
-          });
-          break;
-        case GAME_STATES.INSTRUCTIONS:
-          GameInstructions({
-            ctx,
-            canvas,
-            mouseX,
-            mouseY,
-            clicked,
-            onStateChange: handleStateChange
-          });
-          break;
-        case GAME_STATES.MAP:
-          GameMap({
-            ctx,
-            canvas,
-            mouseX,
-            mouseY,
-            clicked,
-            frameCount,
-            totalScore: gameData.totalScore,
-            completedGames: gameData.completedGames,
-            particles,
-            xavierImage,
-            xavierImageLoaded,
-            mortyImage,
-            mortyImageLoaded,
-            mikeImage,
-            mikeImageLoaded,
-            carsonImage,
-            carsonImageLoaded,
-            avaImage,
-            avaImageLoaded,
-            onStateChange: handleStateChange,
-            onInitMiniGame: initMiniGame
-          });
-          break;
-        case GAME_STATES.FRONTDESK:
-          FrontDesk({
-            ctx,
-            canvas,
-            mouseX,
-            mouseY,
-            clicked,
-            frameCount,
-            gameData: gameData,
-            keys: keys,
-            particles: particles,
-            onStateChange: handleStateChange,
-            onUpdateGameData: (newGameData) => { gameData = newGameData; }
-          });
-          break;
-        case GAME_STATES.WORKOUT:
-          Workout({
-            ctx,
-            canvas,
-            mouseX,
-            mouseY,
-            clicked,
-            frameCount,
-            gameData: gameData,
-            keys: keys,
-            particles: particles,
-            onStateChange: handleStateChange,
-            onUpdateGameData: (newGameData) => { gameData = newGameData; }
-          });
-          break;
-        case GAME_STATES.SMOOTHIE:
-          Smoothie({
-            ctx,
-            canvas,
-            mouseX,
-            mouseY,
-            clicked,
-            frameCount,
-            gameData: gameData,
-            particles: particles,
-            onStateChange: handleStateChange,
-            onUpdateGameData: (newGameData) => { gameData = newGameData; }
-          });
-          break;
-        case GAME_STATES.BASKETBALL:
-          Basketball({
-            ctx,
-            canvas,
-            mouseX,
-            mouseY,
-            clicked,
-            frameCount,
-            gameData: gameData,
-            keys: keys,
-            particles: particles,
-            onStateChange: handleStateChange,
-            onUpdateGameData: (newGameData) => { gameData = newGameData; }
-          });
-          break;
-        case GAME_STATES.SWIMMING:
-          Swimming({
-            ctx,
-            canvas,
-            mouseX,
-            mouseY,
-            clicked,
-            frameCount,
-            gameData: gameData,
-            keys: keys,
-            particles: particles,
-            onStateChange: handleStateChange,
-            onUpdateGameData: (newGameData) => { gameData = newGameData; }
-          });
-          break;
-        case GAME_STATES.YOGA:
-          Yoga({
-            ctx,
-            canvas,
-            mouseX,
-            mouseY,
-            clicked,
-            frameCount,
-            gameData: gameData,
-            keys: keys,
-            particles: particles,
-            onStateChange: handleStateChange,
-            onUpdateGameData: (newGameData) => { gameData = newGameData; }
-          });
-          break;
-        case GAME_STATES.CARDIO:
-          Cardio({
-            ctx,
-            canvas,
-            mouseX,
-            mouseY,
-            clicked,
-            frameCount,
-            gameData: gameData,
-            keys: keys,
-            particles: particles,
-            onStateChange: handleStateChange,
-            onUpdateGameData: (newGameData) => { gameData = newGameData; }
-          });
-          break;
-        case GAME_STATES.VICTORY:
-          Victory({
-            ctx,
-            canvas,
-            mouseX,
-            mouseY,
-            clicked,
-            frameCount,
-            totalScore: gameData.totalScore,
-            particles: particles,
-            xavierImage: xavierImage,
-            xavierImageLoaded: xavierImageLoaded,
-            mortyImage: mortyImage,
-            mortyImageLoaded: mortyImageLoaded,
-            mikeImage: mikeImage,
-            mikeImageLoaded: mikeImageLoaded,
-            carsonImage: carsonImage,
-            carsonImageLoaded: carsonImageLoaded,
-            avaImage: avaImage,
-            avaImageLoaded: avaImageLoaded,
-            onStateChange: handleStateChange,
-            completedGames: gameData.completedGames
-          });
-          break;
-        case GAME_STATES.LEADERBOARD:
-          setShowLeaderboard(true);
-          setCurrentGameData(gameData);
-          GameMenu({
-            ctx,
-            canvas,
-            mouseX,
-            mouseY,
-            clicked,
-            frameCount,
-            backgroundStars,
-            particles,
-            xavierImage,
-            xavierImageLoaded,
-            mortyImage,
-            mortyImageLoaded,
-            mikeImage,
-            mikeImageLoaded,
-            carsonImage,
-            carsonImageLoaded,
-            avaImage,
-            avaImageLoaded,
-            onStateChange: handleStateChange
-          });
-          break;
-        case GAME_STATES.SAVE_LOAD:
-          setShowSaveLoad(true);
-          setCurrentGameData(gameData);
-          GameMenu({
-            ctx,
-            canvas,
-            mouseX,
-            mouseY,
-            clicked,
-            frameCount,
-            backgroundStars,
-            particles,
-            xavierImage,
-            xavierImageLoaded,
-            mortyImage,
-            mortyImageLoaded,
-            mikeImage,
-            mikeImageLoaded,
-            carsonImage,
-            carsonImageLoaded,
-            avaImage,
-            avaImageLoaded,
-            onStateChange: handleStateChange
-          });
-          break;
-      }
-
-      drawParticles(ctx, particles);
-
-      clicked = false;
-      frameCount++;
-      requestAnimationFrame(gameLoop);
     }
 
+    console.log('Starting game loop...');
     gameLoop();
 
     return () => {
+      console.log('Cleaning up Index component...');
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('click', handleClick);
       canvas.removeEventListener('touchstart', handleTouchStart);
@@ -621,6 +684,8 @@ const Index = () => {
     setShowSaveLoad(false);
     setCurrentGameState(GAME_STATES.MAP);
   };
+
+  console.log('Rendering Index component JSX...');
 
   return (
     <div className="fixed inset-0 bg-gray-900 flex items-center justify-center overflow-hidden">
