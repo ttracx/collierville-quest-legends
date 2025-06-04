@@ -1,4 +1,4 @@
-import { Member } from '../types/gameTypes';
+import { Member, GameLore, AICharacter } from '../types/gameTypes';
 
 interface GeneratedLore {
   gymName: string;
@@ -15,6 +15,59 @@ export interface AIReturn {
 }
 
 export const aiService = {
+  getApiKey: (): string | null => {
+    // Return null for now as we're using mocked responses
+    return null;
+  },
+
+  generateLore: async (): Promise<GameLore> => {
+    // Mocked AI response for generating game lore
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          setting: 'Welcome to the Collierville Fitness Center, where fitness dreams come true!',
+          backstory: 'Once a quiet town, Collierville has become the epicenter of fitness excellence. Local legends Xavier and Morty have inspired a new generation of fitness enthusiasts.',
+          locations: {
+            frontDesk: 'The bustling front desk where members check in for their fitness journey.',
+            gym: 'State-of-the-art workout facility with top-notch equipment.',
+            smoothieBar: 'Refreshing smoothie bar offering the perfect post-workout nutrition.'
+          },
+          characters: {
+            xavier: 'Xavier Lightning - The legendary fitness guru',
+            morty: 'Morty Thunder - The motivational powerhouse'
+          }
+        });
+      }, 500);
+    });
+  },
+
+  generateCharacter: async (role: 'member' | 'trainer' | 'staff'): Promise<AICharacter> => {
+    // Mocked AI response for generating a character
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const names = {
+          member: ['Alex', 'Sam', 'Jordan', 'Casey', 'Taylor'],
+          trainer: ['Coach Mike', 'Trainer Sarah', 'Instructor Dave'],
+          staff: ['Manager Lisa', 'Assistant Tom', 'Receptionist Emma']
+        };
+        
+        const randomName = names[role][Math.floor(Math.random() * names[role].length)];
+        const randomColor = '#'+Math.floor(Math.random()*16777215).toString(16);
+        
+        resolve({
+          id: `${role}_${Math.floor(Math.random() * 10000)}`,
+          name: randomName,
+          description: `A dedicated ${role} at the fitness center`,
+          personality: `Energetic and motivated ${role}`,
+          backstory: `Has been part of the fitness community for years`,
+          appearance: `Athletic build with ${randomColor} themed workout gear`,
+          role: role,
+          color: randomColor
+        });
+      }, 500);
+    });
+  },
+
   generateGymLore: async (): Promise<GeneratedLore> => {
     // Mocked AI response for generating gym lore
     return new Promise((resolve) => {
@@ -77,6 +130,7 @@ export const aiService = {
   },
 
   generateCharacterNames: (): { xavier: string; morty: string } => {
+    // Mocked AI response for generating character names
     const xavierNames = ['Xavier Lightning', 'Xavier Power', 'Xavier Strong', 'Xavier Swift', 'Xavier Bold'];
     const mortyNames = ['Morty Thunder', 'Morty Quick', 'Morty Brave', 'Morty Flash', 'Morty Fire'];
     
