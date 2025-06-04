@@ -107,4 +107,12 @@ export interface GameData {
   cardio: CardioData;
   totalScore: number;
   completedGames: Set<GameState>;
+  // Individual score properties for easier access
+  basketballScore: number;
+  swimmingScore: number;
+  yogaScore: number;
+  cardioScore: number;
+  frontDeskScore: number;
+  workoutScore: number;
+  smoothieScore: number;
 }

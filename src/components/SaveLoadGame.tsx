@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Save, Download, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from './ui/button';
@@ -10,7 +11,7 @@ import { useToast } from './ui/use-toast';
 
 interface SaveLoadGameProps {
   gameState: any;
-  scores: any;
+  scores: Record<string, number>;
   onLoadGame: (gameState: any, scores: any) => void;
   onClose?: () => void;
 }
@@ -64,7 +65,7 @@ export const SaveLoadGame: React.FC<SaveLoadGameProps> = ({
       });
       
       // Also submit to leaderboard
-      const totalScore = Object.values(scores).reduce((sum: number, score: any) => sum + (score || 0), 0);
+      const totalScore = Object.values(scores).reduce((sum: number, score: number) => sum + (score || 0), 0);
       await gameDataService.submitToLeaderboard(username, totalScore);
     } else {
       setError(result.error || 'Failed to save game');
@@ -107,7 +108,7 @@ export const SaveLoadGame: React.FC<SaveLoadGameProps> = ({
     return result.success ? result.userId || null : null;
   };
 
-  const currentTotalScore = Object.values(scores).reduce((sum: number, score: any) => sum + (score || 0), 0);
+  const currentTotalScore = Object.values(scores).reduce((sum: number, score: number) => sum + (score || 0), 0);
 
   return (
     <Card className="w-full max-w-md mx-auto">

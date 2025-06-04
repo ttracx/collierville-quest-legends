@@ -5,7 +5,6 @@ export class AIService {
   private apiKey: string | null;
 
   constructor() {
-    // Get API key from environment service
     this.apiKey = environmentService.getOpenAIApiKey();
   }
 
@@ -18,7 +17,6 @@ export class AIService {
   }
 
   async generateCharacter(role: 'member' | 'trainer' | 'staff'): Promise<AICharacter | null> {
-    // Check if AI is enabled
     if (!this.isEnabled()) {
       console.warn('AI service is disabled. Using fallback character generation.');
       return this.generateFallbackCharacter(role);
@@ -72,7 +70,7 @@ Make the character diverse, interesting, and appropriate for a family-friendly f
         id: Math.random().toString(36).substr(2, 9),
         name: characterData.name,
         description: characterData.description,
-        personality: characterData.personality,
+        personality: Array.isArray(characterData.personality) ? characterData.personality.join(', ') : characterData.personality,
         backstory: characterData.backstory,
         appearance: characterData.appearance,
         role,
@@ -85,7 +83,6 @@ Make the character diverse, interesting, and appropriate for a family-friendly f
   }
 
   async generateLore(): Promise<any> {
-    // Check if AI is enabled
     if (!this.isEnabled()) {
       console.warn('AI service is disabled. Using fallback lore generation.');
       return this.generateFallbackLore();
@@ -130,14 +127,11 @@ Make it engaging, family-friendly, and focused on fitness, teamwork, and healthy
       const data = await response.json();
       let content = data.choices[0].message.content;
       
-      // Clean up the response by removing markdown code blocks if present
       content = content.replace(/```json\s*/g, '').replace(/```\s*$/g, '').trim();
       
-      // Parse the cleaned JSON
       return JSON.parse(content);
     } catch (error) {
       console.error('Error generating lore:', error);
-      // Return fallback lore if API fails
       return {
         setting: "In the vibrant town of Collierville, the LF Legends fitness center stands as a beacon of health and adventure. This state-of-the-art facility combines cutting-edge equipment with fun challenges that inspire members to reach their fitness goals.",
         backstory: "Xavier and Morty discovered a mysterious fitness challenge map hidden in the gym's trophy case. The map revealed three legendary trials that promised to unlock the secrets of true fitness mastery. Together, they embarked on an epic quest to complete all challenges and become the ultimate LF Legends.",
@@ -148,7 +142,10 @@ Make it engaging, family-friendly, and focused on fitness, teamwork, and healthy
         },
         characters: {
           xavier: "A determined young athlete with incredible agility and a positive attitude that inspires everyone around him. His leadership skills and unwavering dedication make him the perfect guide for any fitness adventure.",
-          morty: "Xavier's loyal companion who brings creativity and problem-solving skills to every challenge. His enthusiasm for healthy living and team spirit make him an invaluable partner in their quest for fitness excellence."
+          morty: "Xavier's loyal companion who brings creativity and problem-solving skills to every challenge. His enthusiasm for healthy living and team spirit make him an invaluable partner in their quest for fitness excellence.",
+          mike: "The fitness center's strength coach who specializes in weightlifting and muscle building. His encouraging demeanor and expert knowledge help members push past their limits safely.",
+          carson: "A competitive basketball player who brings athletic excellence to every game. His sportsmanship and team-first attitude make him a natural leader on the court.",
+          ava: "A certified yoga instructor who promotes mindfulness and flexibility. Her calming presence and expert guidance help members find balance in both body and mind."
         }
       };
     }
@@ -163,14 +160,14 @@ Make it engaging, family-friendly, and focused on fitness, teamwork, and healthy
         {
           name: 'Alex',
           description: 'An enthusiastic fitness beginner eager to learn new exercises. Always arrives early and stays late to practice.',
-          personality: ['motivated', 'curious', 'friendly', 'determined'],
+          personality: 'motivated, curious, friendly, determined',
           backstory: 'Recently moved to Collierville and joined the fitness center to make new friends. Previously worked in an office job and decided to prioritize health.',
           appearance: 'Average height with an athletic build in progress, short dark hair, and always wearing colorful workout gear.'
         },
         {
           name: 'Jordan',
           description: 'A regular member who loves group fitness classes. Known for encouraging others during tough workouts.',
-          personality: ['supportive', 'energetic', 'social', 'optimistic'],
+          personality: 'supportive, energetic, social, optimistic',
           backstory: 'Former college athlete who maintains fitness through regular gym visits. Works as a local teacher and believes in leading by example.',
           appearance: 'Tall and lean, with curly brown hair often in a ponytail, bright smile, and coordinated athletic wear.'
         }
@@ -179,7 +176,7 @@ Make it engaging, family-friendly, and focused on fitness, teamwork, and healthy
         {
           name: 'Coach Taylor',
           description: 'A certified personal trainer specializing in strength training. Known for creating personalized workout plans.',
-          personality: ['professional', 'encouraging', 'knowledgeable', 'patient'],
+          personality: 'professional, encouraging, knowledgeable, patient',
           backstory: 'Former competitive powerlifter who transitioned to coaching after an injury. Passionate about helping others reach their potential safely.',
           appearance: 'Muscular build, close-cropped hair, often wearing the gym\'s trainer uniform with a whistle around the neck.'
         }
@@ -188,7 +185,7 @@ Make it engaging, family-friendly, and focused on fitness, teamwork, and healthy
         {
           name: 'Sam',
           description: 'Front desk coordinator who knows every member by name. Always ready with a smile and helpful advice.',
-          personality: ['welcoming', 'organized', 'helpful', 'cheerful'],
+          personality: 'welcoming, organized, helpful, cheerful',
           backstory: 'Started as a part-time employee while in college and loved the environment so much they stayed full-time. Certified in CPR and first aid.',
           appearance: 'Medium height, friendly face, neat appearance, always wearing the fitness center polo and name badge.'
         }

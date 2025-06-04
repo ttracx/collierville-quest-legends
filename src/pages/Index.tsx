@@ -36,21 +36,17 @@ const Index = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Enhanced mobile-first canvas sizing
     const updateCanvasSize = () => {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
       
-      // Account for iOS Safari's dynamic viewport and safe areas
       const actualHeight = window.visualViewport ? window.visualViewport.height : viewportHeight;
       
-      // Use full viewport for immersive experience on mobile
       canvas.width = viewportWidth;
       canvas.height = actualHeight;
       canvas.style.width = `${viewportWidth}px`;
       canvas.style.height = `${actualHeight}px`;
       
-      // Prevent zoom on iOS
       canvas.style.touchAction = 'manipulation';
       
       console.log(`Canvas sized: ${viewportWidth}x${actualHeight} (mobile-optimized)`);
@@ -71,15 +67,12 @@ const Index = () => {
     window.addEventListener('resize', handleResize);
     window.addEventListener('orientationchange', handleResize);
     
-    // iOS Safari viewport handling
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', handleVisualViewportChange);
     }
 
-    // Initialize sound system
     soundSystem.init();
 
-    // Load Xavier's image
     const xavierImage = new Image();
     xavierImage.src = '/lovable-uploads/8131f420-fab4-4256-83b6-5f8339d387f4.png';
     let xavierImageLoaded = false;
@@ -88,7 +81,6 @@ const Index = () => {
       xavierImageLoaded = true;
     };
 
-    // Load Morty's (Clark's) image
     const mortyImage = new Image();
     mortyImage.src = '/lovable-uploads/7bd337f7-c72b-48c2-a522-fc4dea130240.png';
     let mortyImageLoaded = false;
@@ -97,7 +89,6 @@ const Index = () => {
       mortyImageLoaded = true;
     };
 
-    // Load Mike's image
     const mikeImage = new Image();
     mikeImage.src = generateAvatarDataURL('mike');
     let mikeImageLoaded = false;
@@ -106,7 +97,6 @@ const Index = () => {
       mikeImageLoaded = true;
     };
 
-    // Load Carson's image
     const carsonImage = new Image();
     carsonImage.src = generateAvatarDataURL('carson');
     let carsonImageLoaded = false;
@@ -115,7 +105,6 @@ const Index = () => {
       carsonImageLoaded = true;
     };
 
-    // Load Ava's image
     const avaImage = new Image();
     avaImage.src = generateAvatarDataURL('ava');
     let avaImageLoaded = false;
@@ -187,23 +176,27 @@ const Index = () => {
         score: 0,
       },
       totalScore: 0,
-      completedGames: new Set()
+      completedGames: new Set(),
+      basketballScore: 0,
+      swimmingScore: 0,
+      yogaScore: 0,
+      cardioScore: 0,
+      frontDeskScore: 0,
+      workoutScore: 0,
+      smoothieScore: 0
     };
 
-    // Enhanced mobile input handling
     let mouseX = 0, mouseY = 0;
     let clicked = false;
     let keys: { [key: string]: boolean } = {};
     let lastTouchTime = 0;
 
-    // Animation and effects
     let particles: Particle[] = [];
     let backgroundStars: any[] = [];
 
-    // Initialize background stars with mobile-optimized count
     const getStarCount = () => {
       const area = canvas.width * canvas.height;
-      const baseCount = isMobile ? 20 : 50; // Fewer stars on mobile for performance
+      const baseCount = isMobile ? 20 : 50;
       return Math.max(baseCount, Math.min(80, Math.floor(area / 25000)));
     };
 
@@ -263,7 +256,6 @@ const Index = () => {
       mouseX = coords.x;
       mouseY = coords.y;
       
-      // Prevent double-tap zoom on iOS
       const now = Date.now();
       if (now - lastTouchTime < 300) {
         e.preventDefault();
@@ -288,7 +280,6 @@ const Index = () => {
     const handleKeyDown = (e: KeyboardEvent) => keys[e.key] = true;
     const handleKeyUp = (e: KeyboardEvent) => keys[e.key] = false;
 
-    // Enhanced event listeners for mobile
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('click', handleClick);
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
@@ -329,27 +320,22 @@ const Index = () => {
     function handleStateChange(newState: GameState) {
       gameState = newState;
       
-      // Reinitialize stars when state changes for consistency
       if (newState === GAME_STATES.MENU) {
         initializeStars();
       }
       
-      // Add sound effects for state changes
       if (newState === GAME_STATES.VICTORY) {
         soundSystem.playVictory();
       }
     }
 
-    // Main game loop with mobile optimizations
     let frameCount = 0;
 
     function gameLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Update particles with mobile performance considerations
       particles = updateParticles(particles);
 
-      // Reduce particle frequency on mobile for better performance
       const particleFrequency = isMobile ? 240 : 120;
       if (frameCount % particleFrequency === 0) {
         createParticle(Math.random() * canvas.width, 0, '#ffffff', 'trail', particles);
@@ -543,10 +529,8 @@ const Index = () => {
           });
           break;
         case GAME_STATES.LEADERBOARD:
-          // Show leaderboard overlay
           setShowLeaderboard(true);
           setCurrentGameData(gameData);
-          // Continue showing the menu in the background
           GameMenu({
             ctx,
             canvas,
@@ -570,10 +554,8 @@ const Index = () => {
           });
           break;
         case GAME_STATES.SAVE_LOAD:
-          // Show save/load overlay
           setShowSaveLoad(true);
           setCurrentGameData(gameData);
-          // Continue showing the menu in the background
           GameMenu({
             ctx,
             canvas,
@@ -598,7 +580,6 @@ const Index = () => {
           break;
       }
 
-      // Draw particles on top
       drawParticles(ctx, particles);
 
       clicked = false;
@@ -606,10 +587,8 @@ const Index = () => {
       requestAnimationFrame(gameLoop);
     }
 
-    // Start the game
     gameLoop();
 
-    // Cleanup
     return () => {
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('click', handleClick);
@@ -634,7 +613,6 @@ const Index = () => {
 
   const handleLoadGame = (loadedState: any, loadedScores: any) => {
     if (currentGameData) {
-      // Update the game data with loaded scores
       setCurrentGameData({
         ...currentGameData,
         ...loadedScores
@@ -646,7 +624,6 @@ const Index = () => {
 
   return (
     <div className="fixed inset-0 bg-gray-900 flex items-center justify-center overflow-hidden">
-      {/* Enhanced mobile-optimized sound toggle button */}
       <button
         onClick={toggleSound}
         className={`absolute top-2 right-2 z-20 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-colors shadow-lg ${
@@ -673,7 +650,6 @@ const Index = () => {
         }}
       />
       
-      {/* Enhanced footer for mobile */}
       <div className={`absolute ${isMobile ? 'bottom-1' : 'bottom-4'} left-1/2 transform -translate-x-1/2 z-20`}>
         <p className={`text-gray-400 text-center ${isMobile ? 'text-xs' : 'text-xs'}`}>
           by{' '}
@@ -689,7 +665,6 @@ const Index = () => {
         </p>
       </div>
 
-      {/* Leaderboard overlay */}
       {showLeaderboard && createPortal(
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -705,20 +680,19 @@ const Index = () => {
         document.body
       )}
 
-      {/* Save/Load overlay */}
       {showSaveLoad && createPortal(
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="max-w-md w-full">
             <SaveLoadGame
               gameState={currentGameState}
               scores={{
-                basketball: currentGameData?.basketballScore || 0,
-                swimming: currentGameData?.swimmingScore || 0,
-                yoga: currentGameData?.yogaScore || 0,
-                cardio: currentGameData?.cardioScore || 0,
-                frontDesk: currentGameData?.frontDeskScore || 0,
-                workout: currentGameData?.workoutScore || 0,
-                smoothie: currentGameData?.smoothieScore || 0
+                basketball: currentGameData?.basketball.score || 0,
+                swimming: currentGameData?.swimming.score || 0,
+                yoga: currentGameData?.yoga.score || 0,
+                cardio: currentGameData?.cardio.score || 0,
+                frontDesk: currentGameData?.frontDesk.score || 0,
+                workout: currentGameData?.workout.score || 0,
+                smoothie: currentGameData?.smoothie.score || 0
               }}
               onLoadGame={handleLoadGame}
               onClose={() => {

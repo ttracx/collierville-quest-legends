@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { GameState, GAME_STATES } from '../types/gameTypes';
 import { drawText, drawGradientButton, isButtonClicked, isButtonHovered } from '../utils/uiHelpers';
@@ -17,6 +18,12 @@ interface VictoryProps {
   xavierImageLoaded?: boolean;
   mortyImage?: HTMLImageElement;
   mortyImageLoaded?: boolean;
+  mikeImage?: HTMLImageElement;
+  mikeImageLoaded?: boolean;
+  carsonImage?: HTMLImageElement;
+  carsonImageLoaded?: boolean;
+  avaImage?: HTMLImageElement;
+  avaImageLoaded?: boolean;
   onStateChange: (state: GameState) => void;
   completedGames: Set<GameState>;
 }
