@@ -1,4 +1,5 @@
-import { Member, GameLore, AICharacter } from '../types/gameTypes';
+import { Member } from '../types/gameTypes';
+import { GameLore, AICharacter } from '../types/loreTypes';
 
 interface GeneratedLore {
   gymName: string;
