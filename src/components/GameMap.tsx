@@ -1,7 +1,7 @@
 import React from 'react';
 import { GameState, GAME_STATES } from '../types/gameTypes';
 import { drawText, drawGradientButton, isButtonClicked, isButtonHovered, getResponsivePosition } from '../utils/uiHelpers';
-import { drawXavier, drawMorty, drawMike, drawCarson, drawAva } from '../utils/characterDrawing';
+import { drawXavier, drawMorty, drawMike, drawCarson, drawAva, drawPrince } from '../utils/characterDrawing';
 import { createParticle, Particle } from '../utils/particleSystem';
 
 interface GameMapProps {
@@ -24,6 +24,8 @@ interface GameMapProps {
   carsonImageLoaded?: boolean;
   avaImage?: HTMLImageElement;
   avaImageLoaded?: boolean;
+  princeImage?: HTMLImageElement;
+  princeImageLoaded?: boolean;
   onStateChange: (state: GameState) => void;
   onInitMiniGame: (state: GameState) => void;
 }
@@ -48,6 +50,8 @@ export const GameMap: React.FC<GameMapProps> = ({
   carsonImageLoaded,
   avaImage,
   avaImageLoaded,
+  princeImage,
+  princeImageLoaded,
   onStateChange,
   onInitMiniGame
 }) => {
@@ -74,21 +78,23 @@ export const GameMap: React.FC<GameMapProps> = ({
   drawText(ctx, 'FITNESS CHALLENGES', titlePos.x / titlePulse, titlePos.y / titlePulse, titleSize, '#ff6b35', 'center', true);
   ctx.restore();
 
-  // Character positioning with enhanced animations - now with five characters
+  // Character positioning with enhanced animations - now with six characters
   const characterY = isMobile ? (isPortrait ? 120 : 100) : 130;
-  const characterSpacing = isMobile ? 32 : 48;
-  const xavierPos = getResponsivePosition(400 - characterSpacing * 2, characterY, canvas);
-  const mortyPos = getResponsivePosition(400 - characterSpacing, characterY, canvas);
-  const mikePos = getResponsivePosition(400, characterY, canvas);
-  const carsonPos = getResponsivePosition(400 + characterSpacing, characterY, canvas);
-  const avaPos = getResponsivePosition(400 + characterSpacing * 2, characterY, canvas);
+  const characterSpacing = isMobile ? 26 : 40;
+  const xavierPos = getResponsivePosition(400 - characterSpacing * 2.5, characterY, canvas);
+  const mortyPos = getResponsivePosition(400 - characterSpacing * 1.5, characterY, canvas);
+  const mikePos = getResponsivePosition(400 - characterSpacing * 0.5, characterY, canvas);
+  const carsonPos = getResponsivePosition(400 + characterSpacing * 0.5, characterY, canvas);
+  const avaPos = getResponsivePosition(400 + characterSpacing * 1.5, characterY, canvas);
+  const princePos = getResponsivePosition(400 + characterSpacing * 2.5, characterY, canvas);
   
-  const characterScale = isMobile ? 0.4 : 0.6;
+  const characterScale = isMobile ? 0.3 : 0.5;
   drawXavier(ctx, xavierPos.x, xavierPos.y, characterScale, true, frameCount, xavierImage, xavierImageLoaded);
   drawMorty(ctx, mortyPos.x, mortyPos.y, characterScale, true, frameCount, mortyImage, mortyImageLoaded);
   drawMike(ctx, mikePos.x, mikePos.y, characterScale, true, frameCount, mikeImage, mikeImageLoaded);
   drawCarson(ctx, carsonPos.x, carsonPos.y, characterScale, true, frameCount, carsonImage, carsonImageLoaded);
   drawAva(ctx, avaPos.x, avaPos.y, characterScale, true, frameCount, avaImage, avaImageLoaded);
+  drawPrince(ctx, princePos.x, princePos.y, characterScale, true, frameCount, princeImage, princeImageLoaded);
   
   // Enhanced trail particles for all characters
   const particleFrequency = isMobile ? 60 : 30;
@@ -98,6 +104,7 @@ export const GameMap: React.FC<GameMapProps> = ({
     createParticle(mikePos.x + (Math.random() - 0.5) * 20, mikePos.y + 50, '#8B4513', 'trail', particles);
     createParticle(carsonPos.x + (Math.random() - 0.5) * 20, carsonPos.y + 50, '#4169E1', 'trail', particles);
     createParticle(avaPos.x + (Math.random() - 0.5) * 20, avaPos.y + 50, '#D2691E', 'trail', particles);
+    createParticle(princePos.x + (Math.random() - 0.5) * 20, princePos.y + 50, '#8A2BE2', 'trail', particles);
   }
 
   // Enhanced game layout with more games

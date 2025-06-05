@@ -2,7 +2,7 @@
 import React from 'react';
 import { GameState, GAME_STATES } from '../../types/gameTypes';
 import { drawText } from '../../utils/uiHelpers';
-import { drawXavier, drawMorty, drawMike, drawCarson, drawAva } from '../../utils/characterDrawing';
+import { drawXavier, drawMorty, drawMike, drawCarson, drawAva, drawPrince } from '../../utils/characterDrawing';
 import { createParticle, Particle } from '../../utils/particleSystem';
 import { loreManager } from '../../utils/loreManager';
 
@@ -24,6 +24,8 @@ interface CharacterSelectorProps {
   carsonImageLoaded?: boolean;
   avaImage?: HTMLImageElement;
   avaImageLoaded?: boolean;
+  princeImage?: HTMLImageElement;
+  princeImageLoaded?: boolean;
   onStateChange: (state: GameState) => void;
 }
 
@@ -45,19 +47,22 @@ export const CharacterSelector: React.FC<CharacterSelectorProps> = ({
   carsonImageLoaded = false,
   avaImage,
   avaImageLoaded = false,
+  princeImage,
+  princeImageLoaded = false,
   onStateChange
 }) => {
-  // Character positions and click areas
-  const characterSpacing = 80;
-  const xavierX = canvas.width / 2 - characterSpacing * 2;
-  const mortyX = canvas.width / 2 - characterSpacing;
-  const mikeX = canvas.width / 2;
-  const carsonX = canvas.width / 2 + characterSpacing;
-  const avaX = canvas.width / 2 + characterSpacing * 2;
+  // Character positions and click areas - now with 6 characters
+  const characterSpacing = 64;
+  const xavierX = canvas.width / 2 - characterSpacing * 2.5;
+  const mortyX = canvas.width / 2 - characterSpacing * 1.5;
+  const mikeX = canvas.width / 2 - characterSpacing * 0.5;
+  const carsonX = canvas.width / 2 + characterSpacing * 0.5;
+  const avaX = canvas.width / 2 + characterSpacing * 1.5;
+  const princeX = canvas.width / 2 + characterSpacing * 2.5;
   const characterY = 290;
   const characterClickRadius = 50;
 
-  // Draw all five characters with animation
+  // Draw all six characters with animation
   drawXavier(ctx, xavierX, characterY, 1.2, true, frameCount, xavierImage, xavierImageLoaded);
   drawText(ctx, 'Xavier', xavierX, 360, 16, 'white', 'center', true);
   
@@ -76,18 +81,24 @@ export const CharacterSelector: React.FC<CharacterSelectorProps> = ({
   drawText(ctx, 'Ava', avaX, 360, 16, 'white', 'center', true);
   drawText(ctx, 'Cafe Worker', avaX, 380, 12, '#D2691E', 'center', true);
 
+  drawPrince(ctx, princeX, characterY, 1.2, true, frameCount, princeImage, princeImageLoaded);
+  drawText(ctx, 'Prince', princeX, 360, 16, 'white', 'center', true);
+  drawText(ctx, 'Cafe Worker', princeX, 380, 12, '#8A2BE2', 'center', true);
+
   // Check for character clicks
   const distanceToXavier = Math.sqrt(Math.pow(mouseX - xavierX, 2) + Math.pow(mouseY - characterY, 2));
   const distanceToMorty = Math.sqrt(Math.pow(mouseX - mortyX, 2) + Math.pow(mouseY - characterY, 2));
   const distanceToMike = Math.sqrt(Math.pow(mouseX - mikeX, 2) + Math.pow(mouseY - characterY, 2));
   const distanceToCarson = Math.sqrt(Math.pow(mouseX - carsonX, 2) + Math.pow(mouseY - characterY, 2));
   const distanceToAva = Math.sqrt(Math.pow(mouseX - avaX, 2) + Math.pow(mouseY - characterY, 2));
+  const distanceToPrince = Math.sqrt(Math.pow(mouseX - princeX, 2) + Math.pow(mouseY - characterY, 2));
   
   const xavierHovered = distanceToXavier < characterClickRadius;
   const mortyHovered = distanceToMorty < characterClickRadius;
   const mikeHovered = distanceToMike < characterClickRadius;
   const carsonHovered = distanceToCarson < characterClickRadius;
   const avaHovered = distanceToAva < characterClickRadius;
+  const princeHovered = distanceToPrince < characterClickRadius;
 
   // Add hover effects for characters
   if (xavierHovered) {
@@ -145,11 +156,22 @@ export const CharacterSelector: React.FC<CharacterSelectorProps> = ({
     drawText(ctx, 'Click to start!', avaX, characterY + 80, 14, '#D2691E', 'center', true);
   }
 
+  if (princeHovered) {
+    ctx.save();
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = '#8A2BE2';
+    ctx.beginPath();
+    ctx.arc(princeX, characterY, characterClickRadius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    drawText(ctx, 'Click to start!', princeX, characterY + 80, 14, '#8A2BE2', 'center', true);
+  }
+
   // Handle character clicks
-  if (clicked && (xavierHovered || mortyHovered || mikeHovered || carsonHovered || avaHovered)) {
-    const clickX = xavierHovered ? xavierX : mortyHovered ? mortyX : mikeHovered ? mikeX : carsonHovered ? carsonX : avaX;
+  if (clicked && (xavierHovered || mortyHovered || mikeHovered || carsonHovered || avaHovered || princeHovered)) {
+    const clickX = xavierHovered ? xavierX : mortyHovered ? mortyX : mikeHovered ? mikeX : carsonHovered ? carsonX : avaHovered ? avaX : princeX;
     const clickY = characterY;
-    const clickColor = xavierHovered ? '#FFD700' : mortyHovered ? '#00BFFF' : mikeHovered ? '#8B4513' : carsonHovered ? '#4169E1' : '#D2691E';
+    const clickColor = xavierHovered ? '#FFD700' : mortyHovered ? '#00BFFF' : mikeHovered ? '#8B4513' : carsonHovered ? '#4169E1' : avaHovered ? '#D2691E' : '#8A2BE2';
     
     createParticle(clickX, clickY, clickColor, 'burst', particles);
     createParticle(clickX, clickY, '#FFD700', 'burst', particles);

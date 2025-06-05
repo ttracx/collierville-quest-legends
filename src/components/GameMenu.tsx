@@ -26,6 +26,8 @@ interface GameMenuProps {
   carsonImageLoaded?: boolean;
   avaImage?: HTMLImageElement;
   avaImageLoaded?: boolean;
+  princeImage?: HTMLImageElement;
+  princeImageLoaded?: boolean;
   onStateChange: (state: GameState) => void;
 }
 
@@ -48,6 +50,8 @@ export const GameMenu: React.FC<GameMenuProps> = ({
   carsonImageLoaded = false,
   avaImage,
   avaImageLoaded = false,
+  princeImage,
+  princeImageLoaded = false,
   onStateChange
 }) => {
   return (
@@ -81,6 +85,8 @@ export const GameMenu: React.FC<GameMenuProps> = ({
         carsonImageLoaded={carsonImageLoaded}
         avaImage={avaImage}
         avaImageLoaded={avaImageLoaded}
+        princeImage={princeImage}
+        princeImageLoaded={princeImageLoaded}
         onStateChange={onStateChange}
       />
       <MenuButtons

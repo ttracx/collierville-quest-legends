@@ -1,4 +1,6 @@
+
 import { useState, useEffect } from 'react';
+import { generateAvatarDataURL } from '../utils/generateAvatars';
 
 export const useImageLoader = () => {
   const [xavierImage, setXavierImage] = useState<HTMLImageElement>();
@@ -11,6 +13,8 @@ export const useImageLoader = () => {
   const [carsonImageLoaded, setCarsonImageLoaded] = useState(false);
   const [avaImage, setAvaImage] = useState<HTMLImageElement>();
   const [avaImageLoaded, setAvaImageLoaded] = useState(false);
+  const [princeImage, setPrinceImage] = useState<HTMLImageElement>();
+  const [princeImageLoaded, setPrinceImageLoaded] = useState(false);
 
   useEffect(() => {
     // Load Xavier's image
@@ -39,9 +43,9 @@ export const useImageLoader = () => {
     };
     setMortyImage(mortyImg);
 
-    // Load Mike's image (placeholder for now)
+    // Load Mike's image
     const mikeImg = new Image();
-    mikeImg.src = '/lovable-uploads/8131f420-fab4-4256-83b6-5f8339d387f4.png'; // Using Xavier's image as placeholder
+    mikeImg.src = generateAvatarDataURL('mike');
     mikeImg.onload = () => {
       console.log('Mike image loaded successfully');
       setMikeImageLoaded(true);
@@ -52,9 +56,9 @@ export const useImageLoader = () => {
     };
     setMikeImage(mikeImg);
 
-    // Load Carson's image (placeholder for now)
+    // Load Carson's image
     const carsonImg = new Image();
-    carsonImg.src = '/lovable-uploads/8131f420-fab4-4256-83b6-5f8339d387f4.png'; // Using Xavier's image as placeholder
+    carsonImg.src = generateAvatarDataURL('carson');
     carsonImg.onload = () => {
       console.log('Carson image loaded successfully');
       setCarsonImageLoaded(true);
@@ -65,9 +69,9 @@ export const useImageLoader = () => {
     };
     setCarsonImage(carsonImg);
 
-    // Load Ava's image (placeholder for now)
+    // Load Ava's image
     const avaImg = new Image();
-    avaImg.src = '/lovable-uploads/8131f420-fab4-4256-83b6-5f8339d387f4.png'; // Using Xavier's image as placeholder
+    avaImg.src = generateAvatarDataURL('ava');
     avaImg.onload = () => {
       console.log('Ava image loaded successfully');
       setAvaImageLoaded(true);
@@ -77,6 +81,19 @@ export const useImageLoader = () => {
       setAvaImageLoaded(false);
     };
     setAvaImage(avaImg);
+
+    // Load Prince's image
+    const princeImg = new Image();
+    princeImg.src = generateAvatarDataURL('prince');
+    princeImg.onload = () => {
+      console.log('Prince image loaded successfully');
+      setPrinceImageLoaded(true);
+    };
+    princeImg.onerror = (error) => {
+      console.error('Failed to load Prince image:', error);
+      setPrinceImageLoaded(false);
+    };
+    setPrinceImage(princeImg);
   }, []);
 
   return {
@@ -89,6 +106,8 @@ export const useImageLoader = () => {
     carsonImage,
     carsonImageLoaded,
     avaImage,
-    avaImageLoaded
+    avaImageLoaded,
+    princeImage,
+    princeImageLoaded
   };
 };

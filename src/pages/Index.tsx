@@ -150,6 +150,18 @@ const Index = () => {
       console.error('Ava image failed to load:', error);
     };
 
+    const princeImage = new Image();
+    princeImage.src = generateAvatarDataURL('prince');
+    let princeImageLoaded = false;
+    
+    princeImage.onload = () => {
+      console.log('Prince image loaded');
+      princeImageLoaded = true;
+    };
+    princeImage.onerror = (error) => {
+      console.error('Prince image failed to load:', error);
+    };
+
     let gameState: GameState = GAME_STATES.MENU;
     console.log('Game state initialized to:', gameState);
 
@@ -414,6 +426,8 @@ const Index = () => {
               carsonImageLoaded,
               avaImage,
               avaImageLoaded,
+              princeImage,
+              princeImageLoaded,
               onStateChange: handleStateChange
             });
             break;
@@ -449,6 +463,8 @@ const Index = () => {
               carsonImageLoaded,
               avaImage,
               avaImageLoaded,
+              princeImage,
+              princeImageLoaded,
               onStateChange: handleStateChange,
               onInitMiniGame: initMiniGame
             });
@@ -577,6 +593,8 @@ const Index = () => {
               carsonImageLoaded: carsonImageLoaded,
               avaImage: avaImage,
               avaImageLoaded: avaImageLoaded,
+              princeImage: princeImage,
+              princeImageLoaded: princeImageLoaded,
               onStateChange: handleStateChange,
               completedGames: gameData.completedGames
             });
@@ -603,6 +621,8 @@ const Index = () => {
               carsonImageLoaded,
               avaImage,
               avaImageLoaded,
+              princeImage,
+              princeImageLoaded,
               onStateChange: handleStateChange
             });
             break;
@@ -628,6 +648,8 @@ const Index = () => {
               carsonImageLoaded,
               avaImage,
               avaImageLoaded,
+              princeImage,
+              princeImageLoaded,
               onStateChange: handleStateChange
             });
             break;

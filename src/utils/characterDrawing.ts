@@ -653,3 +653,80 @@ export function drawMemberAvatar(
   ctx.fillStyle = color;
   ctx.fillRect(x - 20, currentY + 15, 40, 40);
 }
+
+export const drawPrince = (
+  ctx: CanvasRenderingContext2D, 
+  x: number, 
+  y: number, 
+  scale: number = 1, 
+  animated: boolean = false, 
+  frameCount: number = 0, 
+  image?: HTMLImageElement, 
+  imageLoaded: boolean = false
+) => {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+
+  const bounce = animated ? Math.sin(frameCount * 0.08) * 2 : 0;
+  ctx.translate(0, bounce);
+
+  if (image && imageLoaded) {
+    const imageSize = 60;
+    ctx.drawImage(image, -imageSize/2, -imageSize/2, imageSize, imageSize);
+  } else {
+    // Prince's head
+    ctx.fillStyle = '#8A2BE2';
+    ctx.beginPath();
+    ctx.arc(0, -10, 25, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Prince's hair
+    ctx.fillStyle = '#4B0082';
+    ctx.beginPath();
+    ctx.arc(-8, -25, 12, 0, Math.PI);
+    ctx.arc(8, -25, 12, 0, Math.PI);
+    ctx.fill();
+
+    // Prince's eyes
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.arc(-8, -12, 3, 0, Math.PI * 2);
+    ctx.arc(8, -12, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    ctx.arc(-8, -12, 1.5, 0, Math.PI * 2);
+    ctx.arc(8, -12, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Prince's smile
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, -5, 8, 0.2, Math.PI - 0.2);
+    ctx.stroke();
+
+    // Prince's body
+    ctx.fillStyle = '#9370DB';
+    ctx.fillRect(-12, 15, 24, 30);
+
+    // Prince's arms
+    ctx.fillStyle = '#8A2BE2';
+    ctx.fillRect(-20, 15, 8, 20);
+    ctx.fillRect(12, 15, 8, 20);
+
+    // Prince's legs
+    ctx.fillStyle = '#483D8B';
+    ctx.fillRect(-10, 45, 8, 25);
+    ctx.fillRect(2, 45, 8, 25);
+
+    // Prince's feet
+    ctx.fillStyle = 'black';
+    ctx.fillRect(-12, 70, 12, 6);
+    ctx.fillRect(0, 70, 12, 6);
+  }
+
+  ctx.restore();
+};
