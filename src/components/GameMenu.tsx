@@ -54,50 +54,52 @@ export const GameMenu: React.FC<GameMenuProps> = ({
   princeImageLoaded = false,
   onStateChange
 }) => {
-  return (
-    <>
-      <MenuBackground
-        ctx={ctx}
-        canvas={canvas}
-        frameCount={frameCount}
-        backgroundStars={backgroundStars}
-      />
-      <MenuTitle
-        ctx={ctx}
-        canvas={canvas}
-        frameCount={frameCount}
-      />
-      <CharacterSelector
-        ctx={ctx}
-        canvas={canvas}
-        mouseX={mouseX}
-        mouseY={mouseY}
-        clicked={clicked}
-        frameCount={frameCount}
-        particles={particles}
-        xavierImage={xavierImage}
-        xavierImageLoaded={xavierImageLoaded}
-        mortyImage={mortyImage}
-        mortyImageLoaded={mortyImageLoaded}
-        mikeImage={mikeImage}
-        mikeImageLoaded={mikeImageLoaded}
-        carsonImage={carsonImage}
-        carsonImageLoaded={carsonImageLoaded}
-        avaImage={avaImage}
-        avaImageLoaded={avaImageLoaded}
-        princeImage={princeImage}
-        princeImageLoaded={princeImageLoaded}
-        onStateChange={onStateChange}
-      />
-      <MenuButtons
-        ctx={ctx}
-        canvas={canvas}
-        mouseX={mouseX}
-        mouseY={mouseY}
-        clicked={clicked}
-        particles={particles}
-        onStateChange={onStateChange}
-      />
-    </>
-  );
+  // Call the drawing functions directly
+  MenuBackground({
+    ctx,
+    canvas,
+    frameCount,
+    backgroundStars
+  });
+
+  MenuTitle({
+    ctx,
+    canvas,
+    frameCount
+  });
+
+  CharacterSelector({
+    ctx,
+    canvas,
+    mouseX,
+    mouseY,
+    clicked,
+    frameCount,
+    particles,
+    xavierImage,
+    xavierImageLoaded,
+    mortyImage,
+    mortyImageLoaded,
+    mikeImage,
+    mikeImageLoaded,
+    carsonImage,
+    carsonImageLoaded,
+    avaImage,
+    avaImageLoaded,
+    princeImage,
+    princeImageLoaded,
+    onStateChange
+  });
+
+  MenuButtons({
+    ctx,
+    canvas,
+    mouseX,
+    mouseY,
+    clicked,
+    particles,
+    onStateChange
+  });
+
+  return null;
 };
