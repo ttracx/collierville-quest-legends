@@ -655,78 +655,166 @@ export function drawMemberAvatar(
 }
 
 export const drawPrince = (
-  ctx: CanvasRenderingContext2D, 
-  x: number, 
-  y: number, 
-  scale: number = 1, 
-  animated: boolean = false, 
-  frameCount: number = 0, 
-  image?: HTMLImageElement, 
-  imageLoaded: boolean = false
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  scale: number = 1,
+  animated: boolean = false,
+  frameCount: number,
+  princeImage?: HTMLImageElement,
+  princeImageLoaded: boolean = false
 ) => {
+  const bobOffset = animated ? Math.sin(frameCount * 0.16) * 3 : 0;
+  const currentY = y + bobOffset;
+  
+  // Shadow
   ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(scale, scale);
+  ctx.globalAlpha = 0.3;
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.ellipse(x, y + 100 * scale, 30 * scale, 8 * scale, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
 
-  const bounce = animated ? Math.sin(frameCount * 0.08) * 2 : 0;
-  ctx.translate(0, bounce);
-
-  if (image && imageLoaded) {
-    const imageSize = 60;
-    ctx.drawImage(image, -imageSize/2, -imageSize/2, imageSize, imageSize);
+  if (princeImageLoaded && princeImage) {
+    // Draw Prince's real photo as a circular avatar
+    ctx.save();
+    
+    // Create circular clipping path
+    ctx.beginPath();
+    ctx.arc(x, currentY - 10 * scale, 35 * scale, 0, Math.PI * 2);
+    ctx.clip();
+    
+    // Draw the image scaled and centered
+    const imgSize = 70 * scale;
+    ctx.drawImage(princeImage, x - imgSize/2, currentY - 45 * scale, imgSize, imgSize);
+    
+    ctx.restore();
+    
+    // Add a royal-themed border around Prince's photo (purple)
+    ctx.strokeStyle = '#8A2BE2';
+    ctx.lineWidth = 3 * scale;
+    ctx.beginPath();
+    ctx.arc(x, currentY - 10 * scale, 35 * scale, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    // Add glow effect
+    ctx.save();
+    ctx.shadowColor = '#8A2BE2';
+    ctx.shadowBlur = 10 * scale;
+    ctx.strokeStyle = '#8A2BE2';
+    ctx.lineWidth = 2 * scale;
+    ctx.beginPath();
+    ctx.arc(x, currentY - 10 * scale, 35 * scale, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
   } else {
-    // Prince's head
-    ctx.fillStyle = '#8A2BE2';
+    // Fallback pixel art for Prince
+    // Head
+    ctx.fillStyle = '#f4c2a1';
     ctx.beginPath();
-    ctx.arc(0, -10, 25, 0, Math.PI * 2);
+    ctx.arc(x, currentY, 20 * scale, 0, Math.PI * 2);
     ctx.fill();
 
-    // Prince's hair
-    ctx.fillStyle = '#4B0082';
+    // Hair (styled dark hair)
+    const hairGradient = ctx.createRadialGradient(x, currentY - 10 * scale, 0, x, currentY - 10 * scale, 20 * scale);
+    hairGradient.addColorStop(0, '#2c1810');
+    hairGradient.addColorStop(1, '#1a1a1a');
+    ctx.fillStyle = hairGradient;
     ctx.beginPath();
-    ctx.arc(-8, -25, 12, 0, Math.PI);
-    ctx.arc(8, -25, 12, 0, Math.PI);
+    ctx.arc(x, currentY - 10 * scale, 20 * scale, Math.PI, 0);
+    ctx.fill();
+    
+    // Hair texture/style
+    ctx.beginPath();
+    ctx.moveTo(x - 15 * scale, currentY - 25 * scale);
+    ctx.quadraticCurveTo(x - 8 * scale, currentY - 30 * scale, x, currentY - 25 * scale);
+    ctx.quadraticCurveTo(x + 8 * scale, currentY - 30 * scale, x + 15 * scale, currentY - 25 * scale);
     ctx.fill();
 
-    // Prince's eyes
+    // Eyes (confident brown eyes)
     ctx.fillStyle = 'white';
-    ctx.beginPath();
-    ctx.arc(-8, -12, 3, 0, Math.PI * 2);
-    ctx.arc(8, -12, 3, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillRect(x - 8 * scale, currentY - 5 * scale, 6 * scale, 6 * scale);
+    ctx.fillRect(x + 2 * scale, currentY - 5 * scale, 6 * scale, 6 * scale);
+    ctx.fillStyle = '#8B4513';
+    ctx.fillRect(x - 6 * scale, currentY - 3 * scale, 3 * scale, 3 * scale);
+    ctx.fillRect(x + 3 * scale, currentY - 3 * scale, 3 * scale, 3 * scale);
+    
+    // Eye shine
+    ctx.fillStyle = 'white';
+    ctx.fillRect(x - 7 * scale, currentY - 4 * scale, 1 * scale, 1 * scale);
+    ctx.fillRect(x + 2 * scale, currentY - 4 * scale, 1 * scale, 1 * scale);
 
-    ctx.fillStyle = 'black';
+    // Eyebrows (well-groomed)
+    ctx.strokeStyle = '#2c1810';
+    ctx.lineWidth = 2 * scale;
     ctx.beginPath();
-    ctx.arc(-8, -12, 1.5, 0, Math.PI * 2);
-    ctx.arc(8, -12, 1.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Prince's smile
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(0, -5, 8, 0.2, Math.PI - 0.2);
+    ctx.arc(x - 6 * scale, currentY - 8 * scale, 8 * scale, Math.PI * 1.2, Math.PI * 1.8);
+    ctx.arc(x + 6 * scale, currentY - 8 * scale, 8 * scale, Math.PI * 1.2, Math.PI * 1.8);
     ctx.stroke();
 
-    // Prince's body
-    ctx.fillStyle = '#9370DB';
-    ctx.fillRect(-12, 15, 24, 30);
+    // Nose
+    ctx.strokeStyle = '#e6a88a';
+    ctx.lineWidth = 2 * scale;
+    ctx.beginPath();
+    ctx.moveTo(x, currentY - 2 * scale);
+    ctx.lineTo(x - 4 * scale, currentY + 3 * scale);
+    ctx.lineTo(x + 4 * scale, currentY + 3 * scale);
+    ctx.stroke();
 
-    // Prince's arms
-    ctx.fillStyle = '#8A2BE2';
-    ctx.fillRect(-20, 15, 8, 20);
-    ctx.fillRect(12, 15, 8, 20);
-
-    // Prince's legs
-    ctx.fillStyle = '#483D8B';
-    ctx.fillRect(-10, 45, 8, 25);
-    ctx.fillRect(2, 45, 8, 25);
-
-    // Prince's feet
-    ctx.fillStyle = 'black';
-    ctx.fillRect(-12, 70, 12, 6);
-    ctx.fillRect(0, 70, 12, 6);
+    // Charming smile
+    ctx.strokeStyle = '#8B4513';
+    ctx.lineWidth = 2 * scale;
+    ctx.beginPath();
+    ctx.arc(x, currentY + 8 * scale, 10 * scale, 0.2 * Math.PI, 0.8 * Math.PI);
+    ctx.stroke();
   }
 
-  ctx.restore();
+  // Body with gradient (cafe uniform - polo shirt in purple)
+  const bodyGradient = ctx.createLinearGradient(x - 25 * scale, currentY + 20 * scale, x + 25 * scale, currentY + 80 * scale);
+  bodyGradient.addColorStop(0, '#6B46C1');
+  bodyGradient.addColorStop(1, '#553C9A');
+  ctx.fillStyle = bodyGradient;
+  ctx.fillRect(x - 25 * scale, currentY + 20 * scale, 50 * scale, 60 * scale);
+
+  // Arms
+  ctx.fillRect(x - 35 * scale, currentY + 25 * scale, 10 * scale, 40 * scale);
+  ctx.fillRect(x + 25 * scale, currentY + 25 * scale, 10 * scale, 40 * scale);
+
+  // Collar (polo shirt detail)
+  ctx.strokeStyle = '#553C9A';
+  ctx.lineWidth = 2 * scale;
+  ctx.beginPath();
+  ctx.moveTo(x - 10 * scale, currentY + 20 * scale);
+  ctx.lineTo(x - 15 * scale, currentY + 35 * scale);
+  ctx.moveTo(x + 10 * scale, currentY + 20 * scale);
+  ctx.lineTo(x + 15 * scale, currentY + 35 * scale);
+  ctx.stroke();
+
+  // Name tag
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.rect(x - 15 * scale, currentY + 45 * scale, 30 * scale, 12 * scale);
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1 * scale;
+  ctx.stroke();
+
+  // Name text
+  ctx.fillStyle = '#000';
+  ctx.font = `${8 * scale}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.fillText('PRINCE', x, currentY + 53 * scale);
+
+  // Coffee cup in hand (cafe worker detail)
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(x + 30 * scale, currentY + 50 * scale, 6 * scale, 8 * scale);
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(x + 31 * scale, currentY + 52 * scale, 4 * scale, 4 * scale);
+  // Cup handle
+  ctx.strokeStyle = '#FFFFFF';
+  ctx.lineWidth = 1.5 * scale;
+  ctx.beginPath();
+  ctx.arc(x + 36 * scale, currentY + 54 * scale, 2 * scale, -Math.PI/2, Math.PI/2);
+  ctx.stroke();
 };
